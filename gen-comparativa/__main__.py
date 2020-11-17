@@ -56,7 +56,7 @@ class Worker(QRunnable):
     @pyqtSlot()
     def run(self):
     # Se handler for method_ui -> Pesquisa no Entrez
-        print("Thread start")
+        print("Pesquisa iniciando")
 
         if self.identifier == 0: # Arquivo local
         	self.resultAlignment = LocalAlignment(self.handler)
@@ -72,7 +72,7 @@ class Worker(QRunnable):
         
         self.signals.result.emit(self.resultAlignment)
 
-        print("Thread complete")
+        print("Pesquisa completa")
 
 
 
@@ -193,8 +193,6 @@ class loadingScreen(QMainWindow):
 
 
 	def multiTrheadSearch(self, identifier, handler, email):
-		print("Entrei multiTrheadSearch")
-
 		worker = Worker(identifier, handler, email)
 		worker.signals.result.connect(self.shows)
 		self.threadpool.start(worker)

@@ -136,26 +136,25 @@ def WebAlignment(result_search):
 
     # result_hande = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
 
-    # save_file = open("/results/alignment_result.xml","w")
-    # save_file.write(result_hande.read())
-    # # print(type(save_file))
-    # save_file.close()
+    path = "results/alignment_result.xml"
+
+    # try:
+    #     with open(path,"w") as save_file:
+    #     save_file.write(result_hande.read())
+    #     # print(type(save_file))
+    # except IOError:
+    #     print("Erro na escrita do arquivo de alinhamento: " + path)
+
 
     try:
-        path = "results/alignment_result.xml"
-        result_handle = open(path,"r")
-        # result_handle = open("/results/alignment_result_test.xml","r")
-        blast_record = NCBIXML.read(result_handle)
-        ########
-        print(blast_record)
-        ########
+        with open(path,"r") as result_handle:
+            # result_handle = open("/results/alignment_result_test.xml","r")
+            blast_record = NCBIXML.read(result_handle)
 
     except IOError:
         # Fazer rotina de erro na leitura
-        print("Problem reading: " + path)
+        print("Erro na leitura do arquivo de alinhamento " + path)
         # return False
-
-    
 
 
     # Caso não seja salvo em um arquivo, retornar a variável
@@ -213,12 +212,13 @@ def ShowAlignments(self, blast_record, methodScrn):
                         if alignment.length > maxs:
                             maxs = alignment.length
                         ##########
+
     except IOError:
         print("Erro na escrita: " + path)
 
 
+    self.alignmentScrollFrame.setMinimumSize(QtCore.QSize(1200,  1.5*maxs*(count/3) )) #count*15000)) 
 
-    self.alignmentScrollFrame.setMinimumSize(QtCore.QSize(1200,  1.5*maxs*(count/3) )) #count*15000))  
 
     try:
         with open(path,"r") as r:

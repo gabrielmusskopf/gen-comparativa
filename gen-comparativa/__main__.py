@@ -4,6 +4,8 @@ import sys, os
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 
 from validate_email import validate_email
 
@@ -202,6 +204,7 @@ class loadingScreen(QMainWindow):
    		# print(blast_record)
    		self.rsltScrn.showAlignments(blast_record)
    		self.rsltScrn.showSites(blast_record)
+   		self.rsltScrn.showGraph(blast_record)
    		self.loadingToResultWindow()
 
 
@@ -219,21 +222,28 @@ class resultScreen(QMainWindow):
 		super().__init__()
 
 		self.mthdScrn = methodObject
+		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
 
 		self.result_ui = Ui_ResultWindow()
 		self.result_ui.setupUi(self)
+		
+
 
 		self.result_ui.returnButton.clicked.connect(self.returnToMethod)
 
 
 
 	def showAlignments(self, blast_record):
-		ShowAlignments(self.result_ui, blast_record, self.mthdScrn)
+		ShowAlignments(self.result_ui, blast_record, self.seq_count)
 
 
 
 	def showSites(self,blast_record):
-		ShowSites(self.result_ui, blast_record, self.mthdScrn)
+		ShowSites(self.result_ui, blast_record, self.seq_count)
+
+
+	def showGraph(self, blast_record):
+		ShowGraph(self, blast_record, self.seq_count)
 
 
 

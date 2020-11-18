@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ResultWindow(object):
     def setupUi(self, ResultWindow):
         ResultWindow.setObjectName("ResultWindow")
-        ResultWindow.resize(798, 570)
+        ResultWindow.resize(956, 566)
         self.centralwidget = QtWidgets.QWidget(ResultWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -71,7 +71,10 @@ class Ui_ResultWindow(object):
         self.verticalLayout_2.addWidget(self.frame_3)
         self.tabWidget = QtWidgets.QTabWidget(self.frame_2)
         font = QtGui.QFont()
+        font.setFamily("Bahnschrift SemiBold")
         font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
         self.tabWidget.setFont(font)
         self.tabWidget.setStyleSheet("QTabWidget::pane { /* The tab widget frame */\n"
 "    border-top: 2px solid #C2C7CB;\n"
@@ -224,11 +227,10 @@ class Ui_ResultWindow(object):
         font.setPointSize(11)
         font.setBold(False)
         font.setItalic(False)
-        font.setWeight(7)
+        font.setWeight(50)
         self.alignmentResultLabel.setFont(font)
         self.alignmentResultLabel.setStyleSheet("/* Result Label */\n"
 "QLabel{\n"
-"    font: 63 11pt \"Bahnschrift SemiBold\";\n"
 "    color: rgb(255, 255, 255);\n"
 "    background-color: rgb(40, 40, 40);\n"
 "    border-radius: 5px;\n"
@@ -343,10 +345,116 @@ class Ui_ResultWindow(object):
         self.sitesScrollArea.setWidget(self.sitesScrollAreaWidgetContents)
         self.horizontalLayout_2.addWidget(self.sitesScrollArea)
         self.tabWidget.addTab(self.sitesTab, "")
+        self.basesTab = QtWidgets.QWidget()
+        self.basesTab.setObjectName("basesTab")
+        self.gridLayout_4 = QtWidgets.QGridLayout(self.basesTab)
+        self.gridLayout_4.setObjectName("gridLayout_4")
+        self.basesScrollArea = QtWidgets.QScrollArea(self.basesTab)
+        self.basesScrollArea.setStyleSheet("QScrollBar:vertical {\n"
+"    border: none;\n"
+"    background: rgb(45, 45, 68);\n"
+"    width: 14px;\n"
+"    margin: 15px 0 15px 0;\n"
+"    border-radius: 0px;\n"
+" }\n"
+"\n"
+"/*  HANDLE BAR VERTICAL */\n"
+"QScrollBar::handle:vertical {    \n"
+"    background-color: rgb(80, 80, 122);\n"
+"    min-height: 30px;\n"
+"    border-radius: 7px;\n"
+"}\n"
+"QScrollBar::handle:vertical:hover{    \n"
+"    background-color: rgb(255, 0, 127);\n"
+"}\n"
+"QScrollBar::handle:vertical:pressed {    \n"
+"    background-color: rgb(185, 0, 92);\n"
+"}\n"
+"\n"
+"/* BTN TOP - SCROLLBAR */\n"
+"QScrollBar::sub-line:vertical {\n"
+"    border: none;\n"
+"    background-color: rgb(59, 59, 90);\n"
+"    height: 15px;\n"
+"    border-top-left-radius: 7px;\n"
+"    border-top-right-radius: 7px;\n"
+"    subcontrol-position: top;\n"
+"    subcontrol-origin: margin;\n"
+"}\n"
+"QScrollBar::sub-line:vertical:hover {    \n"
+"    background-color: rgb(255, 0, 127);\n"
+"}\n"
+"QScrollBar::sub-line:vertical:pressed {    \n"
+"    background-color: rgb(185, 0, 92);\n"
+"}\n"
+"\n"
+"/* BTN BOTTOM - SCROLLBAR */\n"
+"QScrollBar::add-line:horizontal {\n"
+"    border: none;\n"
+"    background-color: rgb(59, 59, 90);\n"
+"    height: 15px;\n"
+"    border-bottom-left-radius: 7px;\n"
+"    border-bottom-right-radius: 7px;\n"
+"    subcontrol-position: bottom;\n"
+"    subcontrol-origin: margin;\n"
+"}\n"
+"QScrollBar::add-line:vertical:hover {    \n"
+"    background-color: rgb(255, 0, 127);\n"
+"}\n"
+"QScrollBar::add-line:vertical:pressed {    \n"
+"    background-color: rgb(185, 0, 92);\n"
+"}\n"
+"\n"
+"/* RESET ARROW */\n"
+"QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {\n"
+"    background: none;\n"
+"}\n"
+"QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
+"    background: none;\n"
+"}\n"
+"")
+        self.basesScrollArea.setWidgetResizable(True)
+        self.basesScrollArea.setObjectName("basesScrollArea")
+        self.sitesScrollAreaWidgetContents_3 = QtWidgets.QWidget()
+        self.sitesScrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 873, 600))
+        self.sitesScrollAreaWidgetContents_3.setObjectName("sitesScrollAreaWidgetContents_3")
+        self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.sitesScrollAreaWidgetContents_3)
+        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        self.basesFrame = QtWidgets.QFrame(self.sitesScrollAreaWidgetContents_3)
+        self.basesFrame.setMinimumSize(QtCore.QSize(400, 600))
+        self.basesFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.basesFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.basesFrame.setObjectName("basesFrame")
+        self.horizontalLayout_7 = QtWidgets.QHBoxLayout(self.basesFrame)
+        self.horizontalLayout_7.setContentsMargins(12, 9, 9, 9)
+        self.horizontalLayout_7.setObjectName("horizontalLayout_7")
+        self.graphicsView = PlotWidget(self.basesFrame)
+        self.graphicsView.setMaximumSize(QtCore.QSize(600, 500))
+        self.graphicsView.setStyleSheet("QGraphicsView{\n"
+"    color: rgb(255, 255, 255);\n"
+"    background-color: rgb(40, 40, 40);\n"
+"    border-radius: 5px;\n"
+"}")
+        self.graphicsView.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.graphicsView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.graphicsView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContentsOnFirstShow)
+        self.graphicsView.setObjectName("graphicsView")
+        self.horizontalLayout_7.addWidget(self.graphicsView)
+        self.horizontalLayout_6.addWidget(self.basesFrame)
+        self.basesScrollArea.setWidget(self.sitesScrollAreaWidgetContents_3)
+        self.gridLayout_4.addWidget(self.basesScrollArea, 0, 0, 1, 1)
+        self.tabWidget.addTab(self.basesTab, "")
         self.verticalLayout_2.addWidget(self.tabWidget)
         self.returnButton = QtWidgets.QPushButton(self.frame_2)
         self.returnButton.setMinimumSize(QtCore.QSize(100, 30))
         self.returnButton.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Bahnschrift SemiBold")
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.returnButton.setFont(font)
         self.returnButton.setStyleSheet("QPushButton{\n"
 "    border-radius: 3px;\n"
 "    background-color: rgb(40, 40, 40);\n"
@@ -373,7 +481,7 @@ class Ui_ResultWindow(object):
         ResultWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(ResultWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(ResultWindow)
 
     def retranslateUi(self, ResultWindow):
@@ -382,7 +490,9 @@ class Ui_ResultWindow(object):
         self.searchLabel_2.setText(_translate("ResultWindow", "Resultados"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.alignmentTab), _translate("ResultWindow", "Alinhamento"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.sitesTab), _translate("ResultWindow", "Sítios"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.basesTab), _translate("ResultWindow", "Bases"))
         self.returnButton.setText(_translate("ResultWindow", "Retornar"))
+from pyqtgraph import PlotWidget
 
 
 if __name__ == "__main__":

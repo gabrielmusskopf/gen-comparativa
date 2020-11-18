@@ -7,8 +7,8 @@ import Bio
 from Bio import Entrez, SeqIO, AlignIO, Phylo  
 from Bio.Phylo import PhyloXMLIO
 from Bio.Blast import NCBIWWW, NCBIXML
-from Bio.Seq import Seq
 from Bio.Align.Applications import ClustalOmegaCommandline
+from Bio.Seq import Seq
 
 from validate_email import validate_email
 
@@ -146,27 +146,40 @@ def WebAlignment(result_search):
     print("Entrei no alinhamento da pesquisa web:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("ID de alinhamento: ", result_search['IdList'][0])
 
-    result_hande = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
+    # result_hande = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
 
-    path = "results/alignment_result.xml"
+    # path = "results/alignment_result.xml"
+    path_test = "results/alignment_result_test.xml"
 
+    # try:
+    #     with open(path,"w") as save_file:
+    #         save_file.write(result_hande.read())
+    #         # print(type(save_file))
+    # except IOError:
+    #     print("Erro na escrita do arquivo de alinhamento: " + path)
+
+
+    # try:
+    #     with open(path,"r") as result_handle:
+    #         result_handle = open(path,"r")
+    #         blast_record = NCBIXML.read(result_handle)
+
+    # except IOError:
+    #     # Fazer rotina de erro na leitura
+    #     print("Erro na leitura do arquivo de alinhamento " + path)
+    #     # return False
+
+    ########### Test ###########
     try:
-        with open(path,"w") as save_file:
-            save_file.write(result_hande.read())
-            # print(type(save_file))
-    except IOError:
-        print("Erro na escrita do arquivo de alinhamento: " + path)
-
-
-    try:
-        with open(path,"r") as result_handle:
-            # result_handle = open("/results/alignment_result_test.xml","r")
+        with open(path_test,"r") as result_handle:
+            result_handle = open(path_test,"r")
             blast_record = NCBIXML.read(result_handle)
 
     except IOError:
         # Fazer rotina de erro na leitura
         print("Erro na leitura do arquivo de alinhamento " + path)
         # return False
+    #############################
 
 
     # Caso não seja salvo em um arquivo, retornar a variável
@@ -176,11 +189,10 @@ def WebAlignment(result_search):
 
 
 
-def ShowAlignments(self, blast_record, methodScrn):
+def ShowAlignments(self, blast_record, seq_count):
     print("Entrou na função de exibir o alinhamento:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count = 0
-    toShow = int( methodScrn.method_ui.sequencesAskLineEdit_2.text() )
     maxs = 0
     queryies=[]
     matches=[]
@@ -194,7 +206,7 @@ def ShowAlignments(self, blast_record, methodScrn):
     try:
         with open(path ,'w') as result_file:
             for alignment in blast_record.alignments:
-                if count< toShow:
+                if count< seq_count:
                     for hsp in alignment.hsps:
                         count+=1
 
@@ -209,13 +221,11 @@ def ShowAlignments(self, blast_record, methodScrn):
                         # Para escrever do mesmo jeito que no BLAST
                         # math.ceil() arredonda o número para cima
                         for b in range( 0, math.ceil( len(hsp.query) / 60 )):
-                            print(math.ceil( len(hsp.query) / 60 ))
                             result_file.write(
                                 str((b*60)+1) + " " +  str(hsp.query[b*60:(b+1)*60]) + " " + str((b+1)*60) + "\n" + 
                                 str((b*60)+1) + " " + str(hsp.sbjct[(b*60):(b+1)*60]) + " " + str((b+1)*60) + "\n\n")
 
                         result_file.write("\n\n")
-                        print("\n\n")
 
                         ##########
                         queryies.append(hsp.query)
@@ -246,25 +256,24 @@ def ShowAlignments(self, blast_record, methodScrn):
 
 
 
-def ShowSites(self,blast_record, methodScrn):
+def ShowSites(self, blast_record, seq_count):
     print("Entrou na função de exibir os sitios:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count=0
-    toShow = int(methodScrn.method_ui.sequencesAskLineEdit_2.text())
     queryies=[]
     matches=[]
     subjects=[]
     lengths=[]
     leng = 0
 
-    path = "results/result.txt"
+    path = "results/sites_result.txt"
 
     try:
         with open(path,'w') as result_file:
             result_file.write("\n *** Sítios *** \n\n")
 
             for alignment in blast_record.alignments:
-                if count< toShow:
+                if count< seq_count:
                     for hsp in alignment.hsps:
                         count+=1
                         # self.result_ui.sitesFrame.setMinimumSize(QtCore.QSize(12*alignment.length, 1200))
@@ -348,6 +357,51 @@ def ShowSites(self,blast_record, methodScrn):
 
     print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second,"\n")
 
+
+def ShowGraph(self, blast_record, seq_count):
+
+    count = 0
+    bases = {'A','T','G','C'}   # Dicionário com a quantidade de bases 
+    bases_for_seq = []          # Vetor com os dicíonários -> [ números de bases da sequência 1 , números de bases da sequência 2 ...]
+
+    self.result_ui.basesFrame.setMinimumSize(QtCore.QSize(400, seq_count*600 ))
+
+    try:
+        for alignment in blast_record.alignments:
+            if count< seq_count:
+                for hsp in alignment.hsps:
+                    count+=1
+
+                    s = Seq(hsp.sbjct)
+
+                    count_a = s.count('A')
+                    count_c = s.count('C')
+                    count_t = s.count('T')
+                    count_g = s.count('G')
+
+                    bases = { 
+                            'A': count_a,
+                            'C': count_c,
+                            'T': count_t,
+                            'G': count_g 
+                            }
+                    
+                    bases_for_seq.append(bases)
+
+
+                print("\n\n")
+
+
+    except IOError:
+        print("Erro no desenho dos gráficos")
+
+
+    print(bases_for_seq)
+
+
+    hour = [1,2,3,4,5,6,7,8,9,10]
+    temp = [30,32,34,32,32,35,34,36,31,32]
+    self.result_ui.graphicsView.plot(hour,temp)
 
 
 

@@ -1,4 +1,4 @@
-import os
+import os, sys, traceback
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
@@ -146,7 +146,7 @@ def LocalAlignment(id):
 
 def WebAlignment(result_search):
     # Realiza o alinhamento do método de pesquisa Web
-
+    print("######################")
     print("Entrei no alinhamento da pesquisa web:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("ID de alinhamento: ", result_search['IdList'][0])
 
@@ -174,26 +174,29 @@ def WebAlignment(result_search):
     #     # return False
 
     ########### Test ###########
+
     try:
         with open(path_test,"r") as result_handle:
-            result_handle = open(path_test,"r")
+            # exec('blast_record = NCBIXML.read(result_handle)')
             blast_record = NCBIXML.read(result_handle)
 
     except IOError:
         # Fazer rotina de erro na leitura
-        print("Erro na leitura do arquivo de alinhamento " + path)
-        # return False
+        traceback.print_exc()
+
     #############################
 
 
     # Caso não seja salvo em um arquivo, retornar a variável
-    print("Fim alinhamento: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second, "\n")
+    print("Fim alinhamento: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("######################\n")
 
     return blast_record
 
 
 
 def ShowAlignments(self, blast_record, seq_count):
+    print("###################")
     print("Entrou na função de exibir o alinhamento:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count = 0
@@ -203,9 +206,19 @@ def ShowAlignments(self, blast_record, seq_count):
     subjects=[]
     lengths = []
 
-    # print( int(methodScrn.method_ui.sequencesAskLineEdit_2.text()) )
 
+    ### Para escrever na tela, é preciso gravar em um arquivo ###
     path = "results/result.txt"
+
+    ######### Teste #########
+    # print(blast_record)
+    # print(blast_record.alignments)
+
+    # for key in blast_record.alignments:
+    #     print(key)
+
+    # print(len(blast_record.alignments))
+    #########################
 
     try:
         with open(path ,'w') as result_file:
@@ -214,11 +227,12 @@ def ShowAlignments(self, blast_record, seq_count):
                     for hsp in alignment.hsps:
                         count+=1
 
+
                         ########### Cabeçalho ###########
                         result_file.write("\n *** Alinhamento *** \n" +
                         "Sequência: " + str(alignment.title) + "\n" + 
                         "Comprimento: "+ str(alignment.length) + "\n"+
-                        "Número de bases diferentes: "+str(hsp.gaps)+"\n")
+                        "Número de bases diferentes: " + str(hsp.gaps)+"\n")
 
 
                         ########### Sequências ###########
@@ -256,11 +270,13 @@ def ShowAlignments(self, blast_record, seq_count):
 
 
     # print("\n" + "Tem ",count,"sequências na saída do Blast")
-    print("Saiu da funcao:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second , "\n") 
+    print("Saiu da funcao:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("###################\n") 
 
 
 
 def ShowSites(self, blast_record, seq_count):
+    print("###################")
     print("Entrou na função de exibir os sitios:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count=0
@@ -334,35 +350,15 @@ def ShowSites(self, blast_record, seq_count):
     except IOError:
         print("Erro na leitura: " + path)
 
-    # Para árvore filogenética
-    # wdir = os.getcwd()
-    # print(wdir)
 
-    # in_file = "sites_result.txt"
-    # out_file = "alignment_general.fasta"
-
-    # clustalomega_cline = ClustalOmegaCommandline(infile = in_file, outfile = out_file, verbose = True, auto = False)
-    # print(clustalomega_cline)
-
-    # path = "r'" + str(wdir)
-    # input_comand = '"' + wdir + '/clustal-omega-1.2.2-win64/' + str(clustalomega_cline)[0:8] + '" ' + str(clustalomega_cline)
-    # print(input_comand)
-    # os.system(input_comand)
-
-
-
-    # for i in range(0,len(queryies)):
-    #     for j in range(lengths[0]):
-    #         if queryies[0][j] != subjects[i][j]:
-    #             print("Alteração na posição: " + str(i) + ", " + str(j) + "\n")
-
-    
-    # print(sequences[0][0])
-
-    print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second,"\n")
+    print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("###################\n")
 
 
 def ShowGraph(self, blast_record, seq_count):
+
+    print("###################")
+    print("Entrou na função de exibir gráfico: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count = 0
     bases = {'A','T','G','C'}   # Dicionário com a quantidade de bases 
@@ -397,9 +393,7 @@ def ShowGraph(self, blast_record, seq_count):
     except IOError:
         print("Erro no desenho dos gráficos")
 
-
-    print(sequences)
-
+    # print(sequences)
 
     bas = [1,2,3,4]
     bases_count = []
@@ -419,7 +413,7 @@ def ShowGraph(self, blast_record, seq_count):
         g.addItem(bg1)
         gs.append(g)    
 
-    print(len(gs))
+    # print(len(gs))
     # print(gs)
 
 
@@ -427,12 +421,8 @@ def ShowGraph(self, blast_record, seq_count):
         # self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
         g.plot()
 
-
-
-    # for seq in sequences:       # Para cada sequência -> Percorre o vetor
-    #     for base in bases:      # Para cada base dessa sequência -> Percorre o dicionário
-    #         print(bases[base])
-
+    print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("###################\n")
 
 
 

@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, traceback
 # from PyQt5 import QtCore, QtGui, QtWidgets
 # from PyQt5.QtWidgets import  *#QApplication, QMainWindow, QMessageBox, QRunnable
 from PyQt5.QtGui import *
@@ -48,33 +48,34 @@ class Worker(QRunnable):
     '''
     Worker thread
     '''
-    def __init__(self,identifier, handler, email,*args, **kwargs):
+    def __init__(self,fn,*args, **kwargs):
     	super(Worker,self).__init__()
-    	self.identifier = identifier
-    	self.handler = handler
-    	self.email = email
+    	self.fn = fn
+    	self.args = args
+    	self.kwargs = kwargs
     	self.signals = WorkerSignals()
 
     @pyqtSlot()
     def run(self):
-    # Se handler for method_ui -> Pesquisa no Entrez
         print("Pesquisa iniciada \n")
 
-        if self.identifier == 0: # Arquivo local
-        	self.resultAlignment = LocalAlignment(self.handler)
-        	
+        try:
+        	result = self.fn(*self.args, **self.kwargs)
+	        
+        except:		# Se der algum erro, vai printar no terminal o Traceback
 
-        elif self.identifier == 1:	# Arquivo web
-        	self.resultSearch = Search(self.handler,self.email) # Busca no banco de dados
-        	# print (self.resultSearch)
-        	
-        	if self.resultSearch["IdList"] != []:
-        		self.resultAlignment = WebAlignment(self.resultSearch) # Realiza o alinhamento dessa busca
+        	print("-------------")
+        	traceback.print_exc()
+        	exctype, value = sys.exc_info()[:2]
+        	self.signals.error.emit((exctype, value, traceback.format_exc()))
+        	print("-------------\n\n")
 
-        
-        self.signals.result.emit(self.resultAlignment)
+        else:
+        	self.signals.result.emit(result)	# Retorna o resultado
 
-        print("Pesquisa completa \n")
+        finally:
+        	self.signals.finished.emit()  # Done
+
 
 
 
@@ -150,10 +151,12 @@ class methodScreen(QMainWindow):
 		if self.valid[0] == 1:
 			self.methodToLoadingScreen()
 			if self.valid[1] == 1:
-				self.backgroundSearch(1,self.method_ui)
-			elif self.valid[1] == 0:
+				self.ldngScrn.arguments(1,self.method_ui,self.email)
+				# self.backgroundSearch(1,self.method_ui)
 
-				self.backgroundSearch(0,self.file_return)	
+			elif self.valid[1] == 0:
+				self.ldngScrn.arguments(0,self.file_return,self.email)
+				# self.backgroundSearch(0,self.file_return)	
 
 
 	#### Função inútil ####
@@ -185,6 +188,7 @@ class loadingScreen(QMainWindow):
 		self.setGIF()
 
 
+
 	def setGIF(self):
 		self.loading_ui.movie = QMovie("../images/dna-unscreen.gif")
 		self.loading_ui.label_2.setMovie(self.loading_ui.movie)
@@ -193,13 +197,37 @@ class loadingScreen(QMainWindow):
 
 
 
-	def multiTrheadSearch(self, identifier, handler, email):
-		worker = Worker(identifier, handler, email)
+	def arguments(self, identifier, handler, email):
+		self.identifier = identifier
+		self.handler = handler
+		self.email = email
+		self.multiTrheadSearch()
+
+
+
+	def multiTrheadSearch(self):
+		worker = Worker(self.alignment)
 		worker.signals.result.connect(self.shows)
+		worker.signals.finished.connect(self.thread_complete)
 		self.threadpool.start(worker)
 
 
+	def alignment(self):
 
+		if self.identifier == 0: # Arquivo local
+			resultAlignment = LocalAlignment(self.handler)
+			return resultAlignment
+
+		elif self.identifier == 1:	# Arquivo web
+			resultSearch = Search(self.handler,self.email) # Busca no banco de dados
+
+		if resultSearch["IdList"] != []:
+			resultAlignment = WebAlignment(resultSearch) # Realiza o alinhamento dessa busca
+			return resultAlignment
+
+
+
+	### Resposta do Worker (resultado do alinhamento) ###
 	def shows(self, blast_record):
    		# print(blast_record)
    		self.rsltScrn.showAlignments(blast_record)
@@ -207,6 +235,10 @@ class loadingScreen(QMainWindow):
    		self.rsltScrn.showGraph(blast_record)
    		self.loadingToResultWindow()
 
+
+
+	def thread_complete(self):
+   		print("THREAD COMPLETE!\n")
 
 
 	def loadingToResultWindow(self):

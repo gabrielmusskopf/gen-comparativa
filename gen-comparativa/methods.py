@@ -103,20 +103,31 @@ def Search(method_ui,email):
 
 def LocalAlignment(id):
 
-    print("Entrei no LocalAlignment: ",datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("Entrou no alinhamento de arquivo local: ",datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("ID de alinhamento: ", id)
 
-    # result_handle = NCBIWWW.qblast("blastn", "nt", id, "XML")
+    result_handle = NCBIWWW.qblast("blastn", "nt", id)
+    path = "results/alignment_result.xml"
 
-    # with open("/results/alignment_result.xml","w") as save_file: # Para automaticamente fechar o "save_file"
-    #     save_file.write(result_handle.read())
-    #     result_handle.close()
+    try:
+        with open(path,"w") as save_file: # Para automaticamente fechar o "save_file"
+            save_file.write(result_handle.read())
+            result_handle.close()
+    
+    except IOError:
+        print("Erro na escrita do arquivo de alinhamento: " + path)
 
 
     #########
     result_handle = open("/results/alignment_result_test.xml","r")
     #########
-    # result_handle = open("/results/alignment_result.xml","r")
-    blast_record = NCBIXML.read(result_handle)
+
+    try:
+        with open(path,"r") as result_handle:
+            blast_record = NCBIXML.read(result_handle)
+
+    except IOError:
+        print("Erro na leitura do arquivo de alinhamento: " + path)
 
     #########
     print("blast record: ") 
@@ -124,7 +135,7 @@ def LocalAlignment(id):
     #########
 
 
-    print("Fim do LocalAlignment: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("Fim do alinhamento: " + datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second + "\n")
     return blast_record
 
 
@@ -132,18 +143,19 @@ def LocalAlignment(id):
 def WebAlignment(result_search):
     # Realiza o alinhamento do método de pesquisa Web
 
-    print("Entrei no WebAlignment:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("Entrei no alinhamento da pesquisa web:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("ID de alinhamento: ", result_search['IdList'][0])
 
-    # result_hande = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
+    result_hande = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
 
     path = "results/alignment_result.xml"
 
-    # try:
-    #     with open(path,"w") as save_file:
-    #     save_file.write(result_hande.read())
-    #     # print(type(save_file))
-    # except IOError:
-    #     print("Erro na escrita do arquivo de alinhamento: " + path)
+    try:
+        with open(path,"w") as save_file:
+            save_file.write(result_hande.read())
+            # print(type(save_file))
+    except IOError:
+        print("Erro na escrita do arquivo de alinhamento: " + path)
 
 
     try:
@@ -158,15 +170,14 @@ def WebAlignment(result_search):
 
 
     # Caso não seja salvo em um arquivo, retornar a variável
-    print("Fim do WebAlignment: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+    print("Fim alinhamento: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second, "\n")
 
     return blast_record
 
-'''
-Falta trocar de tela quando o alinhamento é local
-'''
+
 
 def ShowAlignments(self, blast_record, methodScrn):
+    print("Entrou na função de exibir o alinhamento:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count = 0
     toShow = int( methodScrn.method_ui.sequencesAskLineEdit_2.text() )
@@ -198,11 +209,13 @@ def ShowAlignments(self, blast_record, methodScrn):
                         # Para escrever do mesmo jeito que no BLAST
                         # math.ceil() arredonda o número para cima
                         for b in range( 0, math.ceil( len(hsp.query) / 60 )):
+                            print(math.ceil( len(hsp.query) / 60 ))
                             result_file.write(
                                 str((b*60)+1) + " " +  str(hsp.query[b*60:(b+1)*60]) + " " + str((b+1)*60) + "\n" + 
                                 str((b*60)+1) + " " + str(hsp.sbjct[(b*60):(b+1)*60]) + " " + str((b+1)*60) + "\n\n")
 
                         result_file.write("\n\n")
+                        print("\n\n")
 
                         ##########
                         queryies.append(hsp.query)
@@ -228,11 +241,13 @@ def ShowAlignments(self, blast_record, methodScrn):
         print("Erro na leitura: " + path)
 
 
-    print("\n" + "Tem ",count,"sequências na saída do Blast")
+    # print("\n" + "Tem ",count,"sequências na saída do Blast")
+    print("Saiu da funcao:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second , "\n") 
 
 
 
 def ShowSites(self,blast_record, methodScrn):
+    print("Entrou na função de exibir os sitios:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count=0
     toShow = int(methodScrn.method_ui.sequencesAskLineEdit_2.text())
@@ -261,11 +276,6 @@ def ShowSites(self,blast_record, methodScrn):
                         lengths.append(alignment.length)
                         leng += alignment.length 
 
-            # queryies=['ATGCATGCATGCATGC','GATCGATCGATCGATC','ATGCTAGCTAGTCAT']
-            # subjects=['ATGGATGCATGCTTGC','GATTGATCGCTCGATC','ATGATAGCTAGTCCT']
-            # lengths=[len(queryies[0]),len(queryies[1]),len(queryies[2])]
-
-            # print(lengths)
 
             max = 0;
 
@@ -335,6 +345,8 @@ def ShowSites(self,blast_record, methodScrn):
 
     
     # print(sequences[0][0])
+
+    print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second,"\n")
 
 
 

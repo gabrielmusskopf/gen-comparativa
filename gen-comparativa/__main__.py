@@ -56,7 +56,7 @@ class Worker(QRunnable):
     @pyqtSlot()
     def run(self):
     # Se handler for method_ui -> Pesquisa no Entrez
-        print("Pesquisa iniciando")
+        print("Pesquisa iniciada \n")
 
         if self.identifier == 0: # Arquivo local
         	self.resultAlignment = LocalAlignment(self.handler)
@@ -72,7 +72,7 @@ class Worker(QRunnable):
         
         self.signals.result.emit(self.resultAlignment)
 
-        print("Pesquisa completa")
+        print("Pesquisa completa \n")
 
 
 
@@ -136,8 +136,7 @@ class methodScreen(QMainWindow):
 
 
 	def fileBrowser(self):
-		self.file_return = OpenDialogBox(self,self.method_ui) # Retorna só o ID
-	
+		self.file_return = OpenDialogBox(self,self.method_ui) # Retorna só o ID	
 
 
 	def isValidSearch(self):
@@ -152,10 +151,10 @@ class methodScreen(QMainWindow):
 				self.backgroundSearch(1,self.method_ui)
 			elif self.valid[1] == 0:
 
-				self.backgroundSearch(0,self.method_ui)	
+				self.backgroundSearch(0,self.file_return)	
 
 
-
+	#### Função inútil ####
 	def backgroundSearch(self, identifier, handler): 
 		# Handler pode ser: self.method_ui, caso seja pesquisa web, ou self.file_return, caso seja arquivo local
 		# print(self.email)

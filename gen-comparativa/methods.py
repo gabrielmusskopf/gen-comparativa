@@ -3,6 +3,9 @@ import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg 
+
 import Bio
 from Bio import Entrez, SeqIO, AlignIO, Phylo  
 from Bio.Phylo import PhyloXMLIO
@@ -15,6 +18,7 @@ from validate_email import validate_email
 from datetime import datetime
 
 import math
+import numpy as np
 
 
 # Checa se tem formato de email
@@ -362,9 +366,9 @@ def ShowGraph(self, blast_record, seq_count):
 
     count = 0
     bases = {'A','T','G','C'}   # Dicionário com a quantidade de bases 
-    bases_for_seq = []          # Vetor com os dicíonários -> [ números de bases da sequência 1 , números de bases da sequência 2 ...]
+    sequences = []              # Vetor com os dicíonários -> [ números de bases da sequência 1 , números de bases da sequência 2 ...]
 
-    self.result_ui.basesFrame.setMinimumSize(QtCore.QSize(400, seq_count*600 ))
+    self.result_ui.basesFrame.setMinimumSize(QtCore.QSize(400, seq_count*1000 ))
 
     try:
         for alignment in blast_record.alignments:
@@ -374,6 +378,7 @@ def ShowGraph(self, blast_record, seq_count):
 
                     s = Seq(hsp.sbjct)
 
+                    ###### Contando bases ######
                     count_a = s.count('A')
                     count_c = s.count('C')
                     count_t = s.count('T')
@@ -386,22 +391,48 @@ def ShowGraph(self, blast_record, seq_count):
                             'G': count_g 
                             }
                     
-                    bases_for_seq.append(bases)
-
-
-                print("\n\n")
-
+                    sequences.append(bases)
+                    ############################
 
     except IOError:
         print("Erro no desenho dos gráficos")
 
 
-    print(bases_for_seq)
+    print(sequences)
 
 
-    hour = [1,2,3,4,5,6,7,8,9,10]
-    temp = [30,32,34,32,32,35,34,36,31,32]
-    self.result_ui.graphicsView.plot(hour,temp)
+    bas = [1,2,3,4]
+    bases_count = []
+
+
+    for base in bases:
+        bases_count.append(bases[base])
+
+
+    ####### Criando um gráfico por sequência ########
+    gs = []
+
+    for sequence in sequences:
+        g = self.graph()
+        bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.6, brush='r')
+        # self.result_ui.graphicsView.addItem(bg1)
+        g.addItem(bg1)
+        gs.append(g)    
+
+    print(len(gs))
+    # print(gs)
+
+
+    for g in gs:
+        # self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
+        g.plot()
+
+
+
+    # for seq in sequences:       # Para cada sequência -> Percorre o vetor
+    #     for base in bases:      # Para cada base dessa sequência -> Percorre o dicionário
+    #         print(bases[base])
+
 
 
 

@@ -415,34 +415,36 @@ class Ui_ResultWindow(object):
 "")
         self.basesScrollArea.setWidgetResizable(True)
         self.basesScrollArea.setObjectName("basesScrollArea")
-        self.sitesScrollAreaWidgetContents_3 = QtWidgets.QWidget()
-        self.sitesScrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 873, 600))
-        self.sitesScrollAreaWidgetContents_3.setObjectName("sitesScrollAreaWidgetContents_3")
-        self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.sitesScrollAreaWidgetContents_3)
+        self.basesScrollAreaWidgetContents = QtWidgets.QWidget()
+        self.basesScrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 873, 600))
+        self.basesScrollAreaWidgetContents.setObjectName("basesScrollAreaWidgetContents")
+        self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.basesScrollAreaWidgetContents)
         self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_6.setObjectName("horizontalLayout_6")
-        self.basesFrame = QtWidgets.QFrame(self.sitesScrollAreaWidgetContents_3)
+        self.basesFrame = QtWidgets.QFrame(self.basesScrollAreaWidgetContents)
         self.basesFrame.setMinimumSize(QtCore.QSize(400, 600))
         self.basesFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.basesFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.basesFrame.setObjectName("basesFrame")
-        self.horizontalLayout_7 = QtWidgets.QHBoxLayout(self.basesFrame)
-        self.horizontalLayout_7.setContentsMargins(12, 9, 9, 9)
-        self.horizontalLayout_7.setObjectName("horizontalLayout_7")
-        self.graphicsView = PlotWidget(self.basesFrame)
-        self.graphicsView.setMaximumSize(QtCore.QSize(600, 500))
-        self.graphicsView.setStyleSheet("QGraphicsView{\n"
-"    color: rgb(255, 255, 255);\n"
-"    background-color: rgb(40, 40, 40);\n"
-"    border-radius: 5px;\n"
-"}")
-        self.graphicsView.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        self.graphicsView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        self.graphicsView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContentsOnFirstShow)
-        self.graphicsView.setObjectName("graphicsView")
-        self.horizontalLayout_7.addWidget(self.graphicsView)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.basesFrame)
+        self.verticalLayout.setContentsMargins(150, 10, 150, 50)
+        self.verticalLayout.setObjectName("verticalLayout")
+
+#         self.graphicsView = PlotWidget(self.basesFrame)
+#         self.graphicsView.setMaximumSize(QtCore.QSize(600, 500))
+#         self.graphicsView.setStyleSheet("QGraphicsView{\n"
+# "    color: rgb(255, 255, 255);\n"
+# "    background-color: rgb(40, 40, 40);\n"
+# "    border-radius: 5px;\n"
+# "}")
+#         self.graphicsView.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+#         self.graphicsView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+#         self.graphicsView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContentsOnFirstShow)
+#         self.graphicsView.setObjectName("graphicsView")
+#         self.horizontalLayout_7.addWidget(self.graphicsView)
+
         self.horizontalLayout_6.addWidget(self.basesFrame)
-        self.basesScrollArea.setWidget(self.sitesScrollAreaWidgetContents_3)
+        self.basesScrollArea.setWidget(self.basesScrollAreaWidgetContents)
         self.gridLayout_4.addWidget(self.basesScrollArea, 0, 0, 1, 1)
         self.tabWidget.addTab(self.basesTab, "")
         self.verticalLayout_2.addWidget(self.tabWidget)

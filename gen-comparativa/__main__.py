@@ -227,9 +227,24 @@ class resultScreen(QMainWindow):
 		self.result_ui = Ui_ResultWindow()
 		self.result_ui.setupUi(self)
 		
-
+		self.graph()
 
 		self.result_ui.returnButton.clicked.connect(self.returnToMethod)
+
+
+
+	def graph(self):
+		self.result_ui.graphicsView = PlotWidget(self.result_ui.basesFrame)
+		self.result_ui.graphicsView.setMaximumSize(QtCore.QSize(600, 500))
+		self.result_ui.graphicsView.setStyleSheet("QGraphicsView{\n"
+"    color: rgb(255, 255, 255);\n"
+"    background-color: rgb(40, 40, 40);\n"
+"    border-radius: 5px;\n"
+"}")
+		self.result_ui.graphicsView.setObjectName("graphicsView")
+		self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
+
+		return self.result_ui.graphicsView
 
 
 

@@ -221,6 +221,29 @@ def ShowAlignments(self, blast_record, seq_count):
     # print(len(blast_record.alignments))
     #########################
 
+    #################
+    # try:
+    #     for alignment in blast_record.alignments:
+    #         for hsp in alignment.hsps:
+    #             print("Score: ", hsp.score)
+    #             print("Bits: ", hsp.bits)
+    #             print("E: ", hsp.expect)
+    #             print("num_alignments: ", hsp.num_alignments)
+    #             print("Identities: ", hsp.identities)
+    #             print("Positives: ", hsp.positives)
+    #             print("Gaps: ", hsp.gaps)
+    #             print("Strand: ", hsp.strand)
+    #             print("Frame: ",hsp.frame)
+    #             print("Query start: ",hsp.query_start)
+    #             print("Sbjct star: ", hsp.sbjct_start)
+    #             print("\n\n")
+
+    # except:
+    #     traceback.print_exc()
+    #     pass
+
+    #################
+
     try:
         with open(path ,'w') as result_file:
             for alignment in blast_record.alignments:
@@ -233,16 +256,19 @@ def ShowAlignments(self, blast_record, seq_count):
                         result_file.write("\n *** Alinhamento *** \n" +
                         "Sequência: " + str(alignment.title) + "\n" + 
                         "Comprimento: "+ str(alignment.length) + "\n"+
-                        "Número de bases diferentes: " + str(hsp.gaps)+"\n")
+                        "Número de bases diferentes: " + str(hsp.gaps)+"\n\n")
 
 
                         ########### Sequências ###########
                         # Para escrever do mesmo jeito que no BLAST
                         # math.ceil() arredonda o número para cima
                         for b in range( 0, math.ceil( len(hsp.query) / 60 )):
+
+                            # q_s = hsp.query_start
+
                             result_file.write(
-                                str((b*60)+1) + " " +  str(hsp.query[b*60:(b+1)*60]) + " " + str((b+1)*60) + "\n" + 
-                                str((b*60)+1) + " " + str(hsp.sbjct[(b*60):(b+1)*60]) + " " + str((b+1)*60) + "\n\n")
+                                str(hsp.query_start + ((60+1) * b ) ) + " " +  str(hsp.query[ b*60 : (b+1)*60 ] ) + " " + str((hsp.query_start + 60) * (b+1)) + "\n" + 
+                                str(hsp.sbjct_start + ((60+1) * b ) ) + " " + str(hsp.sbjct[ (b*60) : (b+1)*60 ] ) + " " + str((hsp.sbjct_start + 60) * (b+1)) + "\n\n")
 
                         result_file.write("\n\n")
 
@@ -289,6 +315,34 @@ def ShowSites(self, blast_record, seq_count):
 
     path = "results/sites_result.txt"
 
+
+    #################
+    # try:
+    #     for alignment in blast_record.alignments:
+    #         for hsp in alignment.hsps:
+    #             print("Score: ", hsp.score)
+    #             print("Bits: ", hsp.bits)
+    #             print("E: ", hsp.expect)
+    #             print("num_alignments: ", hsp.num_alignments)
+    #             print("Identities: ", hsp.identities)
+    #             print("Positives: ", hsp.positives)
+    #             print("Gaps: ", hsp.gaps)
+    #             print("Strand: ", hsp.strand)
+    #             print("Frame: ",hsp.frame)
+    #             print("Query start: ",hsp.query_start)
+    #             print("Sbjct star: ", hsp.sbjct_start)
+    #             print("\n\n")
+
+    # except:
+    #     traceback.print_exc()
+    #     pass
+
+    #################
+
+
+
+
+
     try:
         with open(path,'w') as result_file:
             result_file.write("\n *** Sítios *** \n\n")
@@ -297,9 +351,7 @@ def ShowSites(self, blast_record, seq_count):
                 if count< seq_count:
                     for hsp in alignment.hsps:
                         count+=1
-                        # self.result_ui.sitesFrame.setMinimumSize(QtCore.QSize(12*alignment.length, 1200))
-                        # result_file.write( str(hsp.query) + "\t" +"\n")
-                        # result_file.write( str(hsp.match) + "\t" +"\n")
+
                         queryies.append(hsp.query)
                         matches.append(hsp.match)
                         subjects.append(hsp.sbjct)
@@ -340,16 +392,16 @@ def ShowSites(self, blast_record, seq_count):
 
                 result_file.write("\n")
     
-    except IOError:
-        print("Erro na escrita: " + path)
+    except:
+        traceback.print_exc()
 
 
     try:
         with open(path,"r") as r:
             self.sitesResultLabel.setText(r.read())
     
-    except IOError:
-        print("Erro na leitura: " + path)
+    except:
+        traceback.print_exc()
 
 
     print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)

@@ -69,10 +69,10 @@ def PopMultipleMethods(self):
 
 
 
-def PopSearchError(self):
+def PopSearchError(error):
     pop = QMessageBox()
     pop.setWindowTitle("Erro")
-    pop.setText("Erro na pesquisa")
+    pop.setText("Erro na pesquisa ou inserção do arquivo\n" + error)
     pop.setIcon(QMessageBox.Critical)
     pop.exec_()
 
@@ -159,6 +159,7 @@ def WebAlignment(result_search):
 
     path = "results/alignment_result.xml"
     # path_test = "results/alignment_result_test.xml"
+    # blast_record = NCBIXML.read(result_handle) 
 
 
     # try:
@@ -187,9 +188,10 @@ def WebAlignment(result_search):
             # exec('blast_record = NCBIXML.read(result_handle)')
             blast_record = NCBIXML.read(result_handle)
 
-    except IOError:
+    except:
         # Fazer rotina de erro na leitura
-        traceback.print_exc()
+        # blast_record = traceback.format_exc()
+        return traceback.format_exc()
 
     #############################
 
@@ -245,43 +247,33 @@ def ShowAlignments(self, blast_record, seq_count):
         with open(path ,'w') as result_file:
             for alignment in blast_record.alignments:
                 for hsp in alignment.hsps:
-                    count+=1
+                    if count < seq_count:   
+                        count+=1
+
+                        ########### Escreve abeçalho ###########
+                        result_file.write("\n *** Alinhamento *** \n" +
+                        "Sequência: " + str(alignment.title) + "\n" + 
+                        "Comprimento: "+ str(alignment.length) + "\n"+
+                        "Número de bases diferentes: " + str(hsp.gaps)+"\n\n")
+
+                        ########### Escreve sequências ###########
+                        # Para escrever do mesmo jeito que no BLAST
+                        # math.ceil() arredonda o número para cima
+                        for b in range( 0, math.ceil( len( hsp.query ) / 60 )):
+
+                            result_file.write(
+                                str(hsp.query_start + (61 * b ) ) + " " + str(hsp.query[ b*60 : (b+1)*60 ] ) + " " + str((hsp.query_start + 60) + (b*61)) + "\n" + 
+                                str(hsp.sbjct_start + (61 * b ) ) + " " + str(hsp.sbjct[ b*60 : (b+1)*60 ] ) + " " + str((hsp.sbjct_start + 60) + (b*61)) + "\n\n")
+
+                        result_file.write("\n\n")
 
 
-                    ########### Escreve abeçalho ###########
-                    result_file.write("\n *** Alinhamento *** \n" +
-                    "Sequência: " + str(alignment.title) + "\n" + 
-                    "Comprimento: "+ str(alignment.length) + "\n"+
-                    "Número de bases diferentes: " + str(hsp.gaps)+"\n\n")
+                        if alignment.length > maxs:
+                            maxs = alignment.length
 
-                    print( len(hsp.query) )
-                    print( len(hsp.sbjct), "\n\n")
 
-                    ########### Escreve sequências ###########
-                    # Para escrever do mesmo jeito que no BLAST
-                    # math.ceil() arredonda o número para cima
-                    for b in range( 0, math.ceil( alignment.length / 60 )):
-
-                        result_file.write(
-                            str(hsp.query_start + (61 * b ) ) + " " + str(hsp.query[ b*60 : (b+1)*60 ] ) + " " + str((hsp.query_start + 60) + (b*61)) + "\n" + 
-                            str(hsp.sbjct_start + (61 * b ) ) + " " + str(hsp.sbjct[ b*60 : (b+1)*60 ] ) + " " + str((hsp.sbjct_start + 60) + (b*61)) + "\n\n")
-
-                    result_file.write("\n\n")
-
-                    ##########
-                    # queryies.append(hsp.query)
-                    # matches.append(hsp.match)
-                    # subjects.append(hsp.sbjct)
-
-                    if alignment.length > maxs:
-                        maxs = alignment.length
-                    ##########
-
-                    if count == seq_count:
-                        break
-
-    except IOError:
-        print("Erro na escrita: " + path)
+    except:
+        traceback.print_exc()
 
 
     self.alignmentScrollFrame.setMinimumSize(QtCore.QSize(1200,  1.5*maxs*(count/3) )) #count*15000)) 
@@ -301,6 +293,7 @@ def ShowAlignments(self, blast_record, seq_count):
 
 
 
+
 def ShowSites(self, blast_record, seq_count):
     print("###################")
     print("Entrou na função de exibir os sitios:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
@@ -311,96 +304,76 @@ def ShowSites(self, blast_record, seq_count):
     subjects=[]
     lengths=[]
     leng = 0
+    maxs = 0
 
     path = "results/sites_result.txt"
 
 
-    #################
-    # try:
-    #     for alignment in blast_record.alignments:
-    #         for hsp in alignment.hsps:
-    #             print("Score: ", hsp.score)
-    #             print("Bits: ", hsp.bits)
-    #             print("E: ", hsp.expect)
-    #             print("num_alignments: ", hsp.num_alignments)
-    #             print("Identities: ", hsp.identities)
-    #             print("Positives: ", hsp.positives)
-    #             print("Gaps: ", hsp.gaps)
-    #             print("Strand: ", hsp.strand)
-    #             print("Frame: ",hsp.frame)
-    #             print("Query start: ",hsp.query_start)
-    #             print("Sbjct star: ", hsp.sbjct_start)
-    #             print("\n\n")
+    for alignment in blast_record.alignments:
+        for hsp in alignment.hsps:
+            if count < seq_count:
+                count+=1
 
-    # except:
-    #     traceback.print_exc()
-    #     pass
+                queryies.append(hsp.query)
+                matches.append(hsp.match)
+                subjects.append(hsp.sbjct)
+                lengths.append(alignment.length)
+                leng += alignment.length 
 
-    #################
+                if alignment.length > maxs:
+                    maxs = alignment.length
 
 
+    print(len(queryies))
+    print(len(subjects))
+    print(len(lengths))
 
+    self.sitesFrame.setMinimumSize(QtCore.QSize(20*maxs, 1200))
 
 
     try:
         with open(path,'w') as result_file:
             result_file.write("\n *** Sítios *** \n\n")
 
-            for alignment in blast_record.alignments:
-                if count< seq_count:
-                    for hsp in alignment.hsps:
-                        count+=1
-
-                        queryies.append(hsp.query)
-                        matches.append(hsp.match)
-                        subjects.append(hsp.sbjct)
-                        lengths.append(alignment.length)
-                        leng += alignment.length 
-
-
-            max = 0;
-
-            for i in range(0,len(lengths)):
-                if lengths[i] > max:
-                    max = lengths[i]
-
-            # print(max)
-
-            self.sitesFrame.setMinimumSize(QtCore.QSize(20*max, 1200))
-
+            '''''' 
             # Escreve a sequência referência (o for é para percorrer os nuceotídeos e dar um espaco depois de mostrar cada um)
+
             result_file.write("Query:\t\t")
 
             for c in range(0,len(queryies[0])):
                 result_file.write(str(queryies[0][c]) + " ")
 
             result_file.write("\n")
+            ''''''
 
 
-
-            # Escreve os subjects (um para cada elemento do)
+            ''''''
+            # Escreve os subjects
             for i in range(0,len(subjects)):    # Percorre os indices de subjects
                 result_file.write("Subject "+ str(i) +":\t")
+
                 for c in range(0,len(subjects[i])): # Percorre as bases de cada subject
+
                     if queryies[0][c] == subjects[i][c]:
                         result_file.write( str(subjects[i][c]) + " ")
-                    else:   # Mutação
-                            # Falta um jeito de marcar a letra sem que fique desalinhado
-                            # Se trocar de cor, troca de todas outras letrar na label
+                    else:                                       # Mutação
                         result_file.write(str(subjects[i][c]) + "! ")
 
                 result_file.write("\n")
-    
+            ''''''
+
     except:
         traceback.print_exc()
 
 
+    ### Colocando a arquivo na tela do programa ###
     try:
         with open(path,"r") as r:
             self.sitesResultLabel.setText(r.read())
     
     except:
         traceback.print_exc()
+    ###############################################
 
 
     print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
@@ -413,15 +386,15 @@ def ShowGraph(self, blast_record, seq_count):
     print("Entrou na função de exibir gráfico: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count = 0
-    bases = {'A','T','G','C'}   # Dicionário com a quantidade de bases 
+    bases = {1,2,3,4}   # Dicionário com a quantidade de bases 
     sequences = []              # Vetor com os dicíonários -> [ números de bases da sequência 1 , números de bases da sequência 2 ...]
 
-    self.result_ui.basesFrame.setMinimumSize(QtCore.QSize(400, seq_count*1000 ))
+    self.result_ui.basesFrame.setMinimumSize(QtCore.QSize(400, seq_count*600 ))
 
     try:
         for alignment in blast_record.alignments:
-            if count< seq_count:
-                for hsp in alignment.hsps:
+            for hsp in alignment.hsps:
+                if count< seq_count:
                     count+=1
 
                     s = Seq(hsp.sbjct)
@@ -463,7 +436,7 @@ def ShowGraph(self, blast_record, seq_count):
         bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.6, brush='r')
         self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
         g.addItem(bg1)
-        gs.append(g)    
+        gs.append(g)   
 
 
     print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)

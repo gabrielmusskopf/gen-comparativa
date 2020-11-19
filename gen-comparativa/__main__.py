@@ -148,6 +148,7 @@ class methodScreen(QMainWindow):
 		# 0 = Local / 1 = Web
 
 		self.valid=IsValidSearch(self.method_ui)	# Retorna um objeto com [Pesquisa Válida, Método de pesquisa]
+
 		if self.valid[0] == 1:
 			self.methodToLoadingScreen()
 			if self.valid[1] == 1:
@@ -214,16 +215,20 @@ class loadingScreen(QMainWindow):
 
 	def alignment(self):
 
-		if self.identifier == 0: # Arquivo local
-			resultAlignment = LocalAlignment(self.handler)
-			return resultAlignment
+		try:
+			if self.identifier == 0: # Arquivo local
+				resultAlignment = LocalAlignment(self.handler)
+				return resultAlignment
 
-		elif self.identifier == 1:	# Arquivo web
-			resultSearch = Search(self.handler,self.email) # Busca no banco de dados
+			elif self.identifier == 1:	# Arquivo web
+				resultSearch = Search(self.handler,self.email) # Busca no banco de dados
 
-		if resultSearch["IdList"] != []:
-			resultAlignment = WebAlignment(resultSearch) # Realiza o alinhamento dessa busca
-			return resultAlignment
+				if resultSearch["IdList"] != []:
+					resultAlignment = WebAlignment(resultSearch) # Realiza o alinhamento dessa busca
+					return resultAlignment
+
+		except:
+			traceback.print_exc()
 
 
 

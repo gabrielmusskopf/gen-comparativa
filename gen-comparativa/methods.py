@@ -1,7 +1,7 @@
 import os, sys, traceback
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
 from PyQt5.QtCore import *
 
 from pyqtgraph import PlotWidget, plot
@@ -98,9 +98,12 @@ def IsValidSearch(self):
 def Search(method_ui,email):
     Entrez.email = email
 
-    handle = Entrez.esearch(db="nucleotide", term = method_ui.searchEdit.text(), idtype="acc", retmax = 1) # Retorna um XML
-    record = Entrez.read(handle) #lendo as infos geradas pela pesquisa # Converte XML para estrutura de dados python (dicionários)
-    handle.close()
+    try:
+        handle = Entrez.esearch(db="nucleotide", term = method_ui.searchEdit.text(), idtype="acc", retmax = 1) # Retorna um XML
+        record = Entrez.read(handle) #lendo as infos geradas pela pesquisa # Converte XML para estrutura de dados python (dicionários)
+        handle.close()
+    except:
+        return False
 
     return record
     
@@ -146,15 +149,17 @@ def LocalAlignment(id):
 
 
 def WebAlignment(result_search):
-    # Realiza o alinhamento do método de pesquisa Web
+
     print("######################")
     print("Entrei no alinhamento da pesquisa web:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("ID de alinhamento: ", result_search['IdList'][0])
 
+
     # result_hande = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
 
-    # path = "results/alignment_result.xml"
-    path_test = "results/alignment_result_test.xml"
+    path = "results/alignment_result.xml"
+    # path_test = "results/alignment_result_test.xml"
+
 
     # try:
     #     with open(path,"w") as save_file:
@@ -174,10 +179,11 @@ def WebAlignment(result_search):
     #     print("Erro na leitura do arquivo de alinhamento " + path)
     #     # return False
 
+
     ########### Test ###########
 
     try:
-        with open(path_test,"r") as result_handle:
+        with open(path,"r") as result_handle:
             # exec('blast_record = NCBIXML.read(result_handle)')
             blast_record = NCBIXML.read(result_handle)
 
@@ -188,7 +194,6 @@ def WebAlignment(result_search):
     #############################
 
 
-    # Caso não seja salvo em um arquivo, retornar a variável
     print("Fim alinhamento: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("######################\n")
 
@@ -197,6 +202,7 @@ def WebAlignment(result_search):
 
 
 def ShowAlignments(self, blast_record, seq_count):
+
     print("###################")
     print("Entrou na função de exibir o alinhamento:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
@@ -211,15 +217,6 @@ def ShowAlignments(self, blast_record, seq_count):
     ### Para escrever na tela, é preciso gravar em um arquivo ###
     path = "results/result.txt"
 
-    ######### Teste #########
-    # print(blast_record)
-    # print(blast_record.alignments)
-
-    # for key in blast_record.alignments:
-    #     print(key)
-
-    # print(len(blast_record.alignments))
-    #########################
 
     #################
     # try:
@@ -247,39 +244,41 @@ def ShowAlignments(self, blast_record, seq_count):
     try:
         with open(path ,'w') as result_file:
             for alignment in blast_record.alignments:
-                if count< seq_count:
-                    for hsp in alignment.hsps:
-                        count+=1
+                for hsp in alignment.hsps:
+                    count+=1
 
 
-                        ########### Cabeçalho ###########
-                        result_file.write("\n *** Alinhamento *** \n" +
-                        "Sequência: " + str(alignment.title) + "\n" + 
-                        "Comprimento: "+ str(alignment.length) + "\n"+
-                        "Número de bases diferentes: " + str(hsp.gaps)+"\n\n")
+                    ########### Escreve abeçalho ###########
+                    result_file.write("\n *** Alinhamento *** \n" +
+                    "Sequência: " + str(alignment.title) + "\n" + 
+                    "Comprimento: "+ str(alignment.length) + "\n"+
+                    "Número de bases diferentes: " + str(hsp.gaps)+"\n\n")
 
+                    print( len(hsp.query) )
+                    print( len(hsp.sbjct), "\n\n")
 
-                        ########### Sequências ###########
-                        # Para escrever do mesmo jeito que no BLAST
-                        # math.ceil() arredonda o número para cima
-                        for b in range( 0, math.ceil( len(hsp.query) / 60 )):
+                    ########### Escreve sequências ###########
+                    # Para escrever do mesmo jeito que no BLAST
+                    # math.ceil() arredonda o número para cima
+                    for b in range( 0, math.ceil( alignment.length / 60 )):
 
-                            # q_s = hsp.query_start
+                        result_file.write(
+                            str(hsp.query_start + (61 * b ) ) + " " + str(hsp.query[ b*60 : (b+1)*60 ] ) + " " + str((hsp.query_start + 60) + (b*61)) + "\n" + 
+                            str(hsp.sbjct_start + (61 * b ) ) + " " + str(hsp.sbjct[ b*60 : (b+1)*60 ] ) + " " + str((hsp.sbjct_start + 60) + (b*61)) + "\n\n")
 
-                            result_file.write(
-                                str(hsp.query_start + ((60+1) * b ) ) + " " +  str(hsp.query[ b*60 : (b+1)*60 ] ) + " " + str((hsp.query_start + 60) * (b+1)) + "\n" + 
-                                str(hsp.sbjct_start + ((60+1) * b ) ) + " " + str(hsp.sbjct[ (b*60) : (b+1)*60 ] ) + " " + str((hsp.sbjct_start + 60) * (b+1)) + "\n\n")
+                    result_file.write("\n\n")
 
-                        result_file.write("\n\n")
+                    ##########
+                    # queryies.append(hsp.query)
+                    # matches.append(hsp.match)
+                    # subjects.append(hsp.sbjct)
 
-                        ##########
-                        queryies.append(hsp.query)
-                        matches.append(hsp.match)
-                        subjects.append(hsp.sbjct)
+                    if alignment.length > maxs:
+                        maxs = alignment.length
+                    ##########
 
-                        if alignment.length > maxs:
-                            maxs = alignment.length
-                        ##########
+                    if count == seq_count:
+                        break
 
     except IOError:
         print("Erro na escrita: " + path)

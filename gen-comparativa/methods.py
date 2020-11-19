@@ -1,7 +1,8 @@
 import os, sys, traceback
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtCore import *
 
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg 
@@ -409,17 +410,10 @@ def ShowGraph(self, blast_record, seq_count):
     for sequence in sequences:
         g = self.graph()
         bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.6, brush='r')
-        # self.result_ui.graphicsView.addItem(bg1)
+        self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
         g.addItem(bg1)
         gs.append(g)    
 
-    # print(len(gs))
-    # print(gs)
-
-
-    for g in gs:
-        # self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
-        g.plot()
 
     print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("###################\n")

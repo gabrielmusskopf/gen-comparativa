@@ -1,1 +1,5 @@
 .vscode/
+
+gen-comparativa/build
+gen-comparativa/dist
+gen-comparativa/__main__.spec

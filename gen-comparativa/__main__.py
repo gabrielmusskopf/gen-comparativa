@@ -1,14 +1,14 @@
 import sys, os, traceback
 # from PyQt5 import QtCore, QtGui, QtWidgets
 # from PyQt5.QtWidgets import  *#QApplication, QMainWindow, QMessageBox, QRunnable
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+# from PyQt5.QtGui import *
+# from PyQt5.QtWidgets import *
+# from PyQt5.QtCore import *
+
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 
 from validate_email import validate_email
-
 
 from gui_login import *
 from gui_methods import *
@@ -266,7 +266,7 @@ class resultScreen(QMainWindow):
 
 
 	def graph(self):
-		self.result_ui.graphicsView = PlotWidget(self.result_ui.basesFrame)
+		self.result_ui.graphicsView = PlotWidget() #self.result_ui.basesFrame)
 		self.result_ui.graphicsView.setMaximumSize(QtCore.QSize(600, 500))
 		self.result_ui.graphicsView.setStyleSheet("QGraphicsView{\n"
 "    color: rgb(255, 255, 255);\n"
@@ -274,7 +274,7 @@ class resultScreen(QMainWindow):
 "    border-radius: 5px;\n"
 "}")
 		self.result_ui.graphicsView.setObjectName("graphicsView")
-		self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
+		# self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
 
 		return self.result_ui.graphicsView
 

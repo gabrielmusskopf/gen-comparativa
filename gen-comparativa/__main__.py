@@ -48,7 +48,7 @@ class Worker(QRunnable):
     '''
     Worker thread
     '''
-    def __init__(self,fn,*args, **kwargs):
+    def __init__(self, fn, *args, **kwargs):
     	super(Worker,self).__init__()
     	self.fn = fn
     	self.args = args
@@ -181,6 +181,7 @@ class loadingScreen(QMainWindow):
 		self.loading_ui = Ui_LoadingWindow()
 		self.loading_ui.setupUi(self)
 
+		self.mthdScrn = methodObject
 		self.rsltScrn = resultScreen(methodObject)
 
 		self.threadpool = QThreadPool()
@@ -209,37 +210,51 @@ class loadingScreen(QMainWindow):
 	def multiTrheadSearch(self):
 		worker = Worker(self.alignment)
 		worker.signals.result.connect(self.shows)
+		worker.signals.error.connect(self.error)
 		worker.signals.finished.connect(self.thread_complete)
 		self.threadpool.start(worker)
 
 
+
 	def alignment(self):
 
-		try:
-			if self.identifier == 0: # Arquivo local
-				resultAlignment = LocalAlignment(self.handler)
-				return resultAlignment
+		if self.identifier == 0: # Arquivo local
+			resultAlignment = LocalAlignment(self.handler)
+			# return resultAlignment
 
-			elif self.identifier == 1:	# Arquivo web
-				resultSearch = Search(self.handler,self.email) # Busca no banco de dados
+		elif self.identifier == 1:	# Arquivo web
+			resultSearch = Search(self.handler,self.email) # Busca no banco de dados
 
-				if resultSearch["IdList"] != []:
-					resultAlignment = WebAlignment(resultSearch) # Realiza o alinhamento dessa busca
-					return resultAlignment
+			if resultSearch["IdList"] != []:
+				resultAlignment = WebAlignment(resultSearch) # Realiza o alinhamento dessa busca
+				# return resultAlignment
 
-		except:
-			traceback.print_exc()
+			# self.error(traceback.format_exc())
+
+		return resultAlignment	# Retorna o resultado do alinhamento ou o erro ocorrido
 
 
 
 	### Resposta do Worker (resultado do alinhamento) ###
 	def shows(self, blast_record):
-   		# print(blast_record)
-   		self.rsltScrn.showAlignments(blast_record)
-   		self.rsltScrn.showSites(blast_record)
-   		self.rsltScrn.showGraph(blast_record)
-   		self.loadingToResultWindow()
 
+		if blast_record != None:
+			# print(blast_record)
+			self.rsltScrn.showAlignments(blast_record)
+			self.rsltScrn.showSites(blast_record)
+			self.rsltScrn.showGraph(blast_record)
+			self.loadingToResultWindow()
+
+
+
+	def error(self, trbck):
+   		self.rsltScrn.returnToMethod()
+   		self.close()
+   		# print("\n\n\n")
+   		print(trbck)
+   		# print(tuple_error[2])
+   		# print("\n\n\n")
+   		# PopSearchError(tuple_error)
 
 
 	def thread_complete(self):
@@ -259,7 +274,6 @@ class resultScreen(QMainWindow):
 		super().__init__()
 
 		self.mthdScrn = methodObject
-		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
 
 		self.result_ui = Ui_ResultWindow()
 		self.result_ui.setupUi(self)
@@ -286,15 +300,18 @@ class resultScreen(QMainWindow):
 
 
 	def showAlignments(self, blast_record):
+		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
 		ShowAlignments(self.result_ui, blast_record, self.seq_count)
 
 
 
 	def showSites(self,blast_record):
+		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
 		ShowSites(self.result_ui, blast_record, self.seq_count)
 
 
 	def showGraph(self, blast_record):
+		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
 		ShowGraph(self, blast_record, self.seq_count)
 
 

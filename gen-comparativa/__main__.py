@@ -61,6 +61,11 @@ class Worker(QRunnable):
 
         try:
         	result = self.fn(*self.args, **self.kwargs)
+
+        	if result == None:
+        		traceback.print_exc()
+	        	exctype, value = sys.exc_info()[:2]
+	        	self.signals.error.emit((exctype, value, traceback.format_exc()))
 	        
         except:		# Se der algum erro, vai printar no terminal o Traceback
 
@@ -98,10 +103,11 @@ class loginScreen(QMainWindow):
 
 		self.setGIF()
 
+		
 
 
 	def setGIF(self):
-		self.login_ui.movie = QMovie("../images/dna02-unscreen.gif")
+		self.login_ui.movie = QMovie("dna02-unscreen.gif")
 		self.login_ui.loginLabel_2.setMovie(self.login_ui.movie)
 		self.login_ui.movie.setScaledSize(QSize(100,100))
 		self.login_ui.movie.start()
@@ -144,27 +150,18 @@ class methodScreen(QMainWindow):
 
 	def isValidSearch(self):
 		# Verifica se a pesquisa é válida
-		# Verifica qual tipo de pesquisa e envia para o backgroundSearch()
 		# 0 = Local / 1 = Web
 
 		self.valid=IsValidSearch(self.method_ui)	# Retorna um objeto com [Pesquisa Válida, Método de pesquisa]
 
 		if self.valid[0] == 1:
 			self.methodToLoadingScreen()
+
 			if self.valid[1] == 1:
 				self.ldngScrn.arguments(1,self.method_ui,self.email)
-				# self.backgroundSearch(1,self.method_ui)
 
 			elif self.valid[1] == 0:
 				self.ldngScrn.arguments(0,self.file_return,self.email)
-				# self.backgroundSearch(0,self.file_return)	
-
-
-	#### Função inútil ####
-	def backgroundSearch(self, identifier, handler): 
-		# Handler pode ser: self.method_ui, caso seja pesquisa web, ou self.file_return, caso seja arquivo local
-		# print(self.email)
-		self.ldngScrn.multiTrheadSearch(identifier, handler,self.email)
 
 
 
@@ -192,7 +189,7 @@ class loadingScreen(QMainWindow):
 
 
 	def setGIF(self):
-		self.loading_ui.movie = QMovie("../images/dna-unscreen.gif")
+		self.loading_ui.movie = QMovie("dna-unscreen.gif")
 		self.loading_ui.label_2.setMovie(self.loading_ui.movie)
 		self.loading_ui.movie.setScaledSize(QSize(200,200))
 		self.loading_ui.movie.start()
@@ -231,6 +228,7 @@ class loadingScreen(QMainWindow):
 
 			# self.error(traceback.format_exc())
 
+
 		return resultAlignment	# Retorna o resultado do alinhamento ou o erro ocorrido
 
 
@@ -250,11 +248,7 @@ class loadingScreen(QMainWindow):
 	def error(self, trbck):
    		self.rsltScrn.returnToMethod()
    		self.close()
-   		# print("\n\n\n")
-   		print(trbck)
-   		# print(tuple_error[2])
-   		# print("\n\n\n")
-   		# PopSearchError(tuple_error)
+   		PopSearchError(trbck)
 
 
 	def thread_complete(self):

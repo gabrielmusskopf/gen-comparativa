@@ -3,3 +3,7 @@
 gen-comparativa/build
 gen-comparativa/dist
 gen-comparativa/__main__.spec
+
+images/
+gen-comparativa/dna-unscreen.gif
+gen-comparativa/dna02-unscreen.gif

@@ -19,7 +19,7 @@ from validate_email import validate_email
 from datetime import datetime
 
 import math
-import numpy as np
+
 
 
 # Checa se tem formato de email
@@ -33,13 +33,30 @@ def CheckEmail(email):
 
 
 
-
 def NotValidEmailPopUp():
 	pop = QMessageBox()
 	pop.setWindowTitle("Erro")
 	pop.setText("Por favor, insira um email válido")
 	pop.setIcon(QMessageBox.Critical)
 	pop.exec_()
+
+
+
+def PopMultipleMethods(self):
+    pop = QMessageBox()
+    pop.setWindowTitle("Erro")
+    pop.setText("Mais de um método selecionado")
+    pop.setIcon(QMessageBox.Critical)
+    pop.exec_()
+
+
+
+def PopSearchError(error):
+    pop = QMessageBox()
+    pop.setWindowTitle("Erro")
+    pop.setText("Erro na pesquisa ou inserção do arquivo\n" + str(error))
+    pop.setIcon(QMessageBox.Critical)
+    pop.exec_()
 
 
 
@@ -57,24 +74,6 @@ def OpenDialogBox(self,method_ui):
         return record.id
     else:
         return "None"
-
-
-
-def PopMultipleMethods(self):
-    pop = QMessageBox()
-    pop.setWindowTitle("Erro")
-    pop.setText("Mais de um método selecionado")
-    pop.setIcon(QMessageBox.Critical)
-    pop.exec_()
-
-
-
-def PopSearchError(error):
-    pop = QMessageBox()
-    pop.setWindowTitle("Erro")
-    pop.setText("Erro na pesquisa ou inserção do arquivo\n" + error)
-    pop.setIcon(QMessageBox.Critical)
-    pop.exec_()
 
 
 
@@ -114,33 +113,36 @@ def LocalAlignment(id):
     print("Entrou no alinhamento de arquivo local: ",datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("ID de alinhamento: ", id)
 
-    result_handle = NCBIWWW.qblast("blastn", "nt", id)
-    path = "results/alignment_result.xml"
 
     try:
-        with open(path,"w") as save_file: # Para automaticamente fechar o "save_file"
-            save_file.write(result_handle.read())
-            result_handle.close()
+        result_handle = NCBIWWW.qblast("blastn", "nt", id)
+        blast_record = NCBIXML.read(result_handle) 
+    except:
+        traceback.print_exc()
+        return None
+
+
+    # try:
+    #     with open(path,"w") as save_file: # Para automaticamente fechar o "save_file"
+    #         save_file.write(result_handle.read())
+    #         result_handle.close()
     
-    except IOError:
-        print("Erro na escrita do arquivo de alinhamento: " + path)
+    # except IOError:
+    #     print("Erro na escrita do arquivo de alinhamento: " + path)
 
 
     #########
-    result_handle = open("/results/alignment_result_test.xml","r")
+    # result_handle = open("/results/alignment_result_test.xml","r")
     #########
 
-    try:
-        with open(path,"r") as result_handle:
-            blast_record = NCBIXML.read(result_handle)
+    # path = "/results/alignment_result.xml"
 
-    except IOError:
-        print("Erro na leitura do arquivo de alinhamento: " + path)
+    # try:
+    #     with open(path,"r") as result_handle:
+    #         blast_record = NCBIXML.read(result_handle)
 
-    #########
-    print("blast record: ") 
-    print(blast_record)
-    #########
+    # except:
+    #     return None
 
 
     print("Fim do alinhamento: " + datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second + "\n")
@@ -154,44 +156,27 @@ def WebAlignment(result_search):
     print("Entrei no alinhamento da pesquisa web:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("ID de alinhamento: ", result_search['IdList'][0])
 
-
-    # result_hande = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
-
-    path = "results/alignment_result.xml"
-    # path_test = "results/alignment_result_test.xml"
-    # blast_record = NCBIXML.read(result_handle) 
-
-
-    # try:
-    #     with open(path,"w") as save_file:
-    #         save_file.write(result_hande.read())
-    #         # print(type(save_file))
-    # except IOError:
-    #     print("Erro na escrita do arquivo de alinhamento: " + path)
-
-
-    # try:
-    #     with open(path,"r") as result_handle:
-    #         result_handle = open(path,"r")
-    #         blast_record = NCBIXML.read(result_handle)
-
-    # except IOError:
-    #     # Fazer rotina de erro na leitura
-    #     print("Erro na leitura do arquivo de alinhamento " + path)
-    #     # return False
+    try:
+        result_handle = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
+        blast_record = NCBIXML.read(result_handle) 
+    except:
+        traceback.print_exc()
+        return None
 
 
     ########### Test ###########
 
-    try:
-        with open(path,"r") as result_handle:
-            # exec('blast_record = NCBIXML.read(result_handle)')
-            blast_record = NCBIXML.read(result_handle)
+    # path = "/results/alignment_result.xml"
+    # # path_test = "results/alignment_result_test.xml"
 
-    except:
-        # Fazer rotina de erro na leitura
-        # blast_record = traceback.format_exc()
-        return traceback.format_exc()
+    # try:
+    #     with open(path,"r") as result_handle:
+    #         # exec('blast_record = NCBIXML.read(result_handle)')
+    #         blast_record = NCBIXML.read(result_handle)
+
+    # except:
+    #     traceback.print_exc()
+    #     return None
 
     #############################
 
@@ -217,7 +202,6 @@ def ShowAlignments(self, blast_record, seq_count):
 
 
     ### Para escrever na tela, é preciso gravar em um arquivo ###
-    path = "results/result.txt"
 
 
     #################
@@ -242,6 +226,8 @@ def ShowAlignments(self, blast_record, seq_count):
     #     pass
 
     #################
+
+    path = "result.txt"
 
     try:
         with open(path ,'w') as result_file:
@@ -431,16 +417,13 @@ def ShowGraph(self, blast_record, seq_count):
 
     for sequence in sequences:
 
-        # bases_count = [  for  in sequences ]
-        # print(bases_count)
-
         for base in sequence:
             bases_count.append(sequence[base])
 
-        print(bases_count)
 
         g = self.graph()
-        bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.3, brush='r')
+        pen = pg.mkPen(color=(255, 0, 0))
+        bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.3, brush='r', pen=pen)
         self.result_ui.graphicsView.setTitle( "A - C - T - G" )
         self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
         g.addItem(bg1)

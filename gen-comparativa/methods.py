@@ -324,10 +324,6 @@ def ShowSites(self, blast_record, seq_count):
                     maxs = alignment.length
 
 
-    print(len(queryies))
-    print(len(subjects))
-    print(len(lengths))
-
     self.sitesFrame.setMinimumSize(QtCore.QSize(20*maxs, 1200))
 
 
@@ -357,7 +353,7 @@ def ShowSites(self, blast_record, seq_count):
                     if queryies[0][c] == subjects[i][c]:
                         result_file.write( str(subjects[i][c]) + " ")
                     else:                                       # Mutação
-                        result_file.write(str(subjects[i][c]) + "! ")
+                        result_file.write(str(subjects[i][c]) + "!")
 
                 result_file.write("\n")
             ''''''
@@ -386,8 +382,9 @@ def ShowGraph(self, blast_record, seq_count):
     print("Entrou na função de exibir gráfico: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
 
     count = 0
-    bases = {1,2,3,4}   # Dicionário com a quantidade de bases 
-    sequences = []              # Vetor com os dicíonários -> [ números de bases da sequência 1 , números de bases da sequência 2 ...]
+    bases = {'A','C','G','T'}   # Dicionário com a quantidade de bases 
+    sequence = []              
+    sequences = []
 
     self.result_ui.basesFrame.setMinimumSize(QtCore.QSize(400, seq_count*600 ))
 
@@ -396,6 +393,8 @@ def ShowGraph(self, blast_record, seq_count):
             for hsp in alignment.hsps:
                 if count< seq_count:
                     count+=1
+
+                    # sequence.append(alignment.title)
 
                     s = Seq(hsp.sbjct)
 
@@ -414,30 +413,40 @@ def ShowGraph(self, blast_record, seq_count):
                     
                     sequences.append(bases)
                     ############################
+            # sequences.append(sequence)
 
-    except IOError:
-        print("Erro no desenho dos gráficos")
+    except :
+        traceback.print_exc()
 
-    # print(sequences)
+    print(sequences)
 
     bas = [1,2,3,4]
     bases_count = []
 
 
-    for base in bases:
-        bases_count.append(bases[base])
 
 
     ####### Criando um gráfico por sequência ########
     gs = []
 
     for sequence in sequences:
+
+        # bases_count = [  for  in sequences ]
+        # print(bases_count)
+
+        for base in sequence:
+            bases_count.append(sequence[base])
+
+        print(bases_count)
+
         g = self.graph()
-        bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.6, brush='r')
+        bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.3, brush='r')
+        self.result_ui.graphicsView.setTitle( "A - C - T - G" )
         self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
         g.addItem(bg1)
         gs.append(g)   
 
+        bases_count.clear()
 
     print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("###################\n")

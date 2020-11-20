@@ -330,7 +330,7 @@ class Ui_ResultWindow(object):
         self.sitesResultLabel = QtWidgets.QLabel(self.sitesFrame)
         font = QtGui.QFont()
         font.setFamily("Consolas")
-        font.setPointSize(11)
+        font.setPointSize(13)
         self.sitesResultLabel.setFont(font)
         self.sitesResultLabel.setStyleSheet("QLabel{\n"
 "    color: rgb(255, 255, 255);\n"
@@ -427,7 +427,7 @@ class Ui_ResultWindow(object):
         self.basesFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.basesFrame.setObjectName("basesFrame")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.basesFrame)
-        self.verticalLayout.setContentsMargins(150, 10, 150, 50)
+        self.verticalLayout.setContentsMargins(150, 50, 150, 50)
         self.verticalLayout.setObjectName("verticalLayout")
 
 #         self.graphicsView = PlotWidget(self.basesFrame)

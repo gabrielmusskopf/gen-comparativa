@@ -286,9 +286,10 @@ class resultScreen(QMainWindow):
 
 	def graph(self):
 		self.result_ui.graphicsView = PlotWidget() #self.result_ui.basesFrame)
-		self.result_ui.graphicsView.setMaximumSize(QtCore.QSize(600, 500))
+		self.result_ui.graphicsView.setMaximumSize(QtCore.QSize(850, 450))
+		self.result_ui.graphicsView.setBackground('w')
 		self.result_ui.graphicsView.setStyleSheet("QGraphicsView{\n"
-"    color: rgb(255, 255, 255);\n"
+"    color: rgb(0, 0, 0);\n"
 "    background-color: rgb(40, 40, 40);\n"
 "    border-radius: 5px;\n"
 "}")

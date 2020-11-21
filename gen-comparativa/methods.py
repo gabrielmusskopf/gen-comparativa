@@ -1,12 +1,16 @@
+## SYSTEM IMPORT
 import os, sys, traceback
 
+## PYQT5 IMPORTS
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QMovie, QTransform
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
 from PyQt5.QtCore import *
 
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg 
 
+## BIOPYTHON IMPORTS
 import Bio
 from Bio import Entrez, SeqIO, AlignIO, Phylo  
 from Bio.Phylo import PhyloXMLIO
@@ -14,10 +18,9 @@ from Bio.Blast import NCBIWWW, NCBIXML
 from Bio.Align.Applications import ClustalOmegaCommandline
 from Bio.Seq import Seq
 
+## OTHER USEFUL IMPORTS
 from validate_email import validate_email
-
 from datetime import datetime
-
 import math
 
 
@@ -240,7 +243,7 @@ def ShowAlignments(self, blast_record, seq_count):
                         result_file.write("\n *** Alinhamento *** \n" +
                         "Sequência: " + str(alignment.title) + "\n" + 
                         "Comprimento: "+ str(alignment.length) + "\n"+
-                        "Número de bases diferentes: " + str(hsp.gaps)+"\n\n")
+                        "Número de bases diferentes: " + str(hamming(hsp.query,hsp.sbjct))+"\n\n")
 
                         ########### Escreve sequências ###########
                         # Para escrever do mesmo jeito que no BLAST
@@ -338,8 +341,8 @@ def ShowSites(self, blast_record, seq_count):
 
                     if queryies[0][c] == subjects[i][c]:
                         result_file.write( str(subjects[i][c]) + " ")
-                    else:                                       # Mutação
-                        result_file.write(str(subjects[i][c]) + "!")
+                    else:                                       
+                        result_file.write(str(subjects[i][c]) + "!") # Mutação
 
                 result_file.write("\n")
             ''''''
@@ -424,7 +427,7 @@ def ShowGraph(self, blast_record, seq_count):
         g = self.graph()
         pen = pg.mkPen(color=(255, 0, 0))
         bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.3, brush='r', pen=pen)
-        self.result_ui.graphicsView.setTitle( "A - C - T - G" )
+        self.result_ui.graphicsView.setTitle( "A  -  C  -  T  -  G" )
         self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
         g.addItem(bg1)
         gs.append(g)   

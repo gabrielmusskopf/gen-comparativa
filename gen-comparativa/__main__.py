@@ -10,13 +10,16 @@ import pyqtgraph as pg
 
 from validate_email import validate_email
 
-from gui_login import *
-from gui_methods import *
-from gui_loading import *
-from gui_result import *
+from ui_login import Ui_LoginWindow
+from ui_methods import Ui_MethodWindow
+from ui_loading import Ui_LoadingWindow
+from ui_result import Ui_ResultWindow
 from methods import *
 
+from ui_splash_screen import Ui_SplashScreen
 
+
+counter = 0
 
 
 class WorkerSignals(QObject):
@@ -41,6 +44,7 @@ class WorkerSignals(QObject):
     finished = pyqtSignal()
     error = pyqtSignal(tuple)
     result = pyqtSignal(object)
+    progress = pyqtSignal(int)
 
 
 
@@ -61,6 +65,7 @@ class Worker(QRunnable):
 
         try:
         	result = self.fn(*self.args, **self.kwargs)
+        	self.signals.progress.emit()
 
         	if result == None:
         		traceback.print_exc()
@@ -83,6 +88,69 @@ class Worker(QRunnable):
 
 
 
+class splashScreen(QMainWindow):
+    def __init__(self):
+        QMainWindow.__init__(self)
+        self.ui = Ui_SplashScreen()
+        self.ui.setupUi(self)
+
+        ## UI ==> INTERFACE CODES
+        ########################################################################
+
+        ## REMOVE TITLE BAR
+        self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
+
+        ## QTIMER ==> START
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.progress)
+        # TIMER IN MILLISECONDS
+        self.timer.start(35)
+
+        # CHANGE DESCRIPTION
+
+        # Initial Text
+        self.ui.label_description.setText("<strong>WELCOME</strong> TO MY APPLICATION")
+
+        # Change Texts
+        QtCore.QTimer.singleShot(1500, lambda: self.ui.label_description.setText("<strong>LOADING</strong> DATABASE"))
+        QtCore.QTimer.singleShot(3000, lambda: self.ui.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
+
+
+        ## SHOW ==> MAIN WINDOW
+        ########################################################################
+        # self.show()
+        ## ==> END ##
+
+    ## ==> APP FUNCTIONS
+    ########################################################################
+    def progress(self):
+
+        global counter
+
+        # SET VALUE TO PROGRESS BAR
+        self.ui.progressBar.setValue(counter)
+
+        # CLOSE SPLASH SCREE AND OPEN APP
+        if counter > 100:
+            # STOP TIMER
+            self.timer.stop()
+
+            # SHOW MAIN WINDOW
+            self.main = loginScreen()
+            self.main.show()
+
+            # CLOSE SPLASH SCREEN
+            self.close()
+
+        # INCREASE COUNTER
+        counter += 1
+
+
+
+
+
 
 class loginScreen(QMainWindow):
 	def __init__(self):
@@ -92,6 +160,9 @@ class loginScreen(QMainWindow):
 		self.login_ui = Ui_LoginWindow()
 		self.login_ui.setupUi(self)
 
+		##
+		# self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+		# self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
 
 		# Instância da classe methodScreen
@@ -108,7 +179,7 @@ class loginScreen(QMainWindow):
 
 	def setGIF(self):
 		self.login_ui.movie = QMovie("dna02-unscreen.gif")
-		self.login_ui.loginLabel_2.setMovie(self.login_ui.movie)
+		self.login_ui.loginPicLabel.setMovie(self.login_ui.movie)
 		self.login_ui.movie.setScaledSize(QSize(100,100))
 		self.login_ui.movie.start()
 
@@ -189,8 +260,8 @@ class loadingScreen(QMainWindow):
 
 
 	def setGIF(self):
-		self.loading_ui.movie = QMovie("dna-unscreen.gif")
-		self.loading_ui.label_2.setMovie(self.loading_ui.movie)
+		self.loading_ui.movie = QMovie("dna03-unscreen.gif")
+		self.loading_ui.imageLabel.setMovie(self.loading_ui.movie)
 		self.loading_ui.movie.setScaledSize(QSize(200,200))
 		self.loading_ui.movie.start()
 
@@ -207,27 +278,27 @@ class loadingScreen(QMainWindow):
 	def multiTrheadSearch(self):
 		worker = Worker(self.alignment)
 		worker.signals.result.connect(self.shows)
+		worker.signals.progress.connect(self.progress)
 		worker.signals.error.connect(self.error)
 		worker.signals.finished.connect(self.thread_complete)
 		self.threadpool.start(worker)
 
 
 
+	def progress(self):
+		print("progress")
+
+
 	def alignment(self):
 
 		if self.identifier == 0: # Arquivo local
 			resultAlignment = LocalAlignment(self.handler)
-			# return resultAlignment
 
 		elif self.identifier == 1:	# Arquivo web
 			resultSearch = Search(self.handler,self.email) # Busca no banco de dados
 
 			if resultSearch["IdList"] != []:
 				resultAlignment = WebAlignment(resultSearch) # Realiza o alinhamento dessa busca
-				# return resultAlignment
-
-			# self.error(traceback.format_exc())
-
 
 		return resultAlignment	# Retorna o resultado do alinhamento ou o erro ocorrido
 
@@ -329,8 +400,6 @@ class resultScreen(QMainWindow):
 if __name__ == "__main__":
 
 	app = QtWidgets.QApplication(sys.argv)
-	ui = loginScreen()
-
-	# ui = methodScreen()
+	ui = splashScreen()	
 	ui.show()
 	sys.exit(app.exec_())

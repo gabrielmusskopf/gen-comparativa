@@ -7,3 +7,9 @@ gen-comparativa/__main__.spec
 images/
 gen-comparativa/dna-unscreen.gif
 gen-comparativa/dna02-unscreen.gif
+
+gen-comparativa/results
+
+gen-comparativa/main.py
+gen-comparativa/ui_splash_screen.py
+gen-comparativa/splash_screen.ui

@@ -70,7 +70,6 @@ def OpenDialogBox(self,method_ui):
     path = filename[0]
     method_ui.insertEdit.setText(path)
 
-    # print(self.filename.read())
 
     if path != '':
         record = SeqIO.read(path,"fasta")
@@ -81,7 +80,11 @@ def OpenDialogBox(self,method_ui):
 
 
 def IsValidSearch(self):
-    # [Válido/Não válido , Web/Local]
+    '''
+    [0] = 1 se for válido
+    [1] = 0 se for local
+    [1] - 1 se for web 
+    '''
 
     if (self.searchEdit.text() != "" or self.insertEdit.text() != ""):
         if (self.searchEdit.text() != "" and self.insertEdit.text() == ""): # Se for web
@@ -99,6 +102,29 @@ def IsValidSearch(self):
 
 def Search(method_ui,email):
     Entrez.email = email
+
+    '''
+    ~ Módulo Entrez
+    
+    Retorna um XML
+
+    Exemplo:
+    >>> from Bio import Entrez
+    >>> Entrez.email = "Your.Name.Here@example.org"
+    >>> handle = Entrez.einfo() # or esearch, efetch, ...
+    >>> record = Entrez.read(handle)
+    >>> handle.close()
+
+    ~ Entrez.esearch()
+    Busca e retorna os IDs
+
+    Em caso de erro de rede, retorna IOError exception
+
+    Parâmetros requeridos:
+    @param db: database 
+
+    Para mais parâmetros: https://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch 
+    '''
 
     try:
         handle = Entrez.esearch(db="nucleotide", term = method_ui.searchEdit.text(), idtype="acc", retmax = 1) # Retorna um XML
@@ -156,22 +182,35 @@ def LocalAlignment(id):
 
 
 def WebAlignment(result_search):
+    '''
+    ~ Módulo Blast
+
+    Função qblast() é responsável por chamar a versão online do Blast
+
+    Parâmetros requeridos:
+
+    @param 'blastn' programa blast para usar   >>>  https://blast.ncbi.nlm.nih.gov/Blast.cgi
+    @param 'nt' database para buscar           >>>  ftp://ftp.ncbi.nlm.nih.gov/pub/factsheets/HowTo_BLASTGuide.pdf
+    @param id pode ser o id da query ou também a sequência no formato fasta
+
+    Para mais parâmetros:
+    >>> from Bio.Blast import NCBIWWW
+    >>> help(NCBIWWW.qblast)
+    '''
 
     print("######################")
     print("Entrei no alinhamento da pesquisa web:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("ID de alinhamento: ", result_search['IdList'][0])
 
+    id = result_search['IdList'][0]
     try:
-        result_handle = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
+        result_handle = NCBIWWW.qblast("blastn", "nt", id)
         blast_record = NCBIXML.read(result_handle) 
-
-        with open("results/alignment_1.xml","w") as f:
-            f.write(result_handle)
-
         result_handle.close()
     except:
         traceback.print_exc()
         return None
+
 
 
     ########### Test ###########
@@ -197,8 +236,39 @@ def WebAlignment(result_search):
     return blast_record
 
 
+'''
+@param self classe de onde foi chamado
+@param blast_record objeto em formato de dicionário que retornou do alinhamento
+@param seq_count número de sequências que aparecerão na tela
 
+
+Nas funções de exibição foi necessário escrever primeiro em um arquivo, para que possa 
+posteriormente ser posto na label da janela criada
+
+Exemplo de acesso à informações no blast_record:
+
+>>> try:
+>>>     for alignment in blast_record.alignments:
+>>>         for hsp in alignment.hsps:
+>>>             print("Score: ", hsp.score)
+>>>             print("Bits: ", hsp.bits)
+>>>             print("E: ", hsp.expect)
+>>>             print("num_alignments: ", hsp.num_alignments)
+>>>             print("Identities: ", hsp.identities)
+>>>             print("Positives: ", hsp.positives)
+>>>             print("Gaps: ", hsp.gaps)
+>>>             print("Strand: ", hsp.strand)
+>>>             print("Frame: ",hsp.frame)
+>>>             print("Query start: ",hsp.query_start)
+>>>             print("Sbjct star: ", hsp.sbjct_start)
+>>> except:
+>>>     traceback.print_exc()
+>>>     pass
+
+
+'''
 def ShowAlignments(self, blast_record, seq_count):
+
 
     print("###################")
     print("Entrou na função de exibir o alinhamento:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
@@ -214,28 +284,7 @@ def ShowAlignments(self, blast_record, seq_count):
     ### Para escrever na tela, é preciso gravar em um arquivo ###
 
 
-    #################
-    # try:
-    #     for alignment in blast_record.alignments:
-    #         for hsp in alignment.hsps:
-    #             print("Score: ", hsp.score)
-    #             print("Bits: ", hsp.bits)
-    #             print("E: ", hsp.expect)
-    #             print("num_alignments: ", hsp.num_alignments)
-    #             print("Identities: ", hsp.identities)
-    #             print("Positives: ", hsp.positives)
-    #             print("Gaps: ", hsp.gaps)
-    #             print("Strand: ", hsp.strand)
-    #             print("Frame: ",hsp.frame)
-    #             print("Query start: ",hsp.query_start)
-    #             print("Sbjct star: ", hsp.sbjct_start)
-    #             print("\n\n")
-
-    # except:
-    #     traceback.print_exc()
-    #     pass
-
-    #################
+   
 
     path = "results/result.txt"
 
@@ -266,12 +315,10 @@ def ShowAlignments(self, blast_record, seq_count):
 
                         if alignment.length > maxs:
                             maxs = alignment.length
-
-
     except:
         traceback.print_exc()
 
-
+    ''' Setando o tamanho conforme a quantidade de sequências '''
     self.alignmentScrollFrame.setMinimumSize(QtCore.QSize(1200,  1.5*maxs*(count/3) )) #count*15000)) 
 
 
@@ -299,44 +346,25 @@ def ShowSites(self, blast_record, seq_count):
     matches=[]
     subjects=[]
     lengths=[]
+    q_starts=[]
+    s_starts=[]
     leng = 0
     maxs = 0
 
     path = "results/sites_result.txt"
 
-    query = blast_record.number
-    print('\n\n')
-    print(query)
-    print('\n\n')
 
     for alignment in blast_record.alignments:
         for hsp in alignment.hsps:
             if count < seq_count:
                 count+=1
 
-                # query = hsp.query
-
-                # result_file.write("\n *** Sítios *** \n\n")
-
-                # '''''' 
-                # # Escreve a sequência referência (o for é para percorrer os nuceotídeos e dar um espaco depois de mostrar cada um)
-                # result_file.write("*** Comparações entre a Query e as Subjects *** \n")
-                # result_file.write("Sequência:\tNúmero de mutações:\tBases:\n")
-
-                # result_file.write("Query:\t\t\t")
-
-                # for c in range(0,len(queryies[0])):
-                #     result_file.write(str(queryies[0][c]) + " ")
-
-                # result_file.write("\n")
-                # ''''''
-
-
-
 
                 queryies.append(hsp.query)
+                q_starts.append(hsp.query_start)
                 matches.append(hsp.match)
                 subjects.append(hsp.sbjct)
+                s_starts.append(hsp.sbjct_start)
                 lengths.append(alignment.length)
                 leng += alignment.length 
 
@@ -349,15 +377,16 @@ def ShowSites(self, blast_record, seq_count):
 
     try:
         with open(path,'w') as result_file:
-            result_file.write("\n *** Sítios *** \n\n")
+            result_file.write("\n*** Sítios ***\n\n")
 
             '''''' 
             # Escreve a sequência referência (o for é para percorrer os nuceotídeos e dar um espaco depois de mostrar cada um)
             result_file.write("*** Comparações entre a Query e as Subjects *** \n")
             result_file.write("Sequência:\tNúmero de mutações:\tBases:\n")
 
-            result_file.write("Query:\t\t\t")
+            result_file.write("Query:\t\t\t\t")
 
+            ''' Escreve cada caractere da sequência com um espaço '''
             for c in range(0,len(queryies[0])):
                 result_file.write(str(queryies[0][c]) + " ")
 
@@ -368,12 +397,15 @@ def ShowSites(self, blast_record, seq_count):
             ''''''
             # Escreve os subjects
             for i in range(len(subjects)):    # Percorre os indices de subjects
-                result_file.write("Subject "+ str(i) +":\t")
+                result_file.write("Subject "+ str(i) +":\t\t")
 
+                '''
+                comparison(seq1,seq2) >>> Retorna uma lista com as posições onde ocorreu mutação
+                '''
                 positions = comparison(queryies[0],subjects[i])
                 # positions = comparison("AAAATTTTCCCCGGGG","AAACTTTTCCCAGGGG") -> 2
 
-                result_file.write(str( len(positions) ) + "\t")
+                result_file.write(str( len(positions) ) + "\t\t")
 
                 for c in range(0,len(subjects[i])): # Percorre as bases de cada subject
 
@@ -384,18 +416,9 @@ def ShowSites(self, blast_record, seq_count):
 
                 result_file.write("\n")
 
-
-            # while i != queryies[].query_start
-
-
-
             result_file.write("\n\n")
             ''''''
 
-            positions = 0
-            for i in range(len(subjects)):
-                
-                result_file.write(str(positions) + "\n")
 
 
     except:
@@ -414,6 +437,9 @@ def ShowSites(self, blast_record, seq_count):
 
     print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("###################\n")
+
+
+
 
 
 def ShowGraph(self, blast_record, seq_count):
@@ -468,6 +494,7 @@ def ShowGraph(self, blast_record, seq_count):
 
     ####### Criando um gráfico por sequência ########
     gs = []
+    i=0
 
     for sequence in sequences:
 
@@ -478,12 +505,14 @@ def ShowGraph(self, blast_record, seq_count):
         g = self.graph()
         pen = pg.mkPen(color=(255, 0, 0))
         bg1 = pg.BarGraphItem(x=bas, height=bases_count, width=0.3, brush='r', pen=pen)
-        self.result_ui.graphicsView.setTitle( "A  -  C  -  T  -  G" )
+        self.result_ui.graphicsView.setTitle( "Subject "+ str(i) + "\nA - T - G - C")
         self.result_ui.verticalLayout.addWidget(self.result_ui.graphicsView)
         g.addItem(bg1)
         gs.append(g)   
 
         bases_count.clear()
+        i+=1
+
 
     print("Saiu da funcao: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
     print("###################\n")

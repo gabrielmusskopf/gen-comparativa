@@ -49,10 +49,14 @@ class WorkerSignals(QObject):
 
 
 class Worker(QRunnable):
+    '''	
+    Classe que realiza o thread múltiplo, externo ao mesmo tempo que o resto do programa
     '''
-    Worker thread
-    '''
+
     def __init__(self, fn, *args, **kwargs):
+    	''' 
+    	@param fn é a função de buca/alinhamento
+    	'''
     	super(Worker,self).__init__()
     	self.fn = fn
     	self.args = args
@@ -65,7 +69,6 @@ class Worker(QRunnable):
 
         try:
         	result = self.fn(*self.args, **self.kwargs)
-        	self.signals.progress.emit()
 
         	if result == None:
         		traceback.print_exc()
@@ -88,72 +91,16 @@ class Worker(QRunnable):
 
 
 
-class splashScreen(QMainWindow):
-    def __init__(self):
-        QMainWindow.__init__(self)
-        self.ui = Ui_SplashScreen()
-        self.ui.setupUi(self)
-
-        ## UI ==> INTERFACE CODES
-        ########################################################################
-
-        ## REMOVE TITLE BAR
-        self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-
-
-        ## QTIMER ==> START
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.progress)
-        # TIMER IN MILLISECONDS
-        self.timer.start(35)
-
-        # CHANGE DESCRIPTION
-
-        # Initial Text
-        self.ui.label_description.setText("<strong>WELCOME</strong> TO MY APPLICATION")
-
-        # Change Texts
-        QtCore.QTimer.singleShot(1500, lambda: self.ui.label_description.setText("<strong>LOADING</strong> DATABASE"))
-        QtCore.QTimer.singleShot(3000, lambda: self.ui.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
-
-
-        ## SHOW ==> MAIN WINDOW
-        ########################################################################
-        # self.show()
-        ## ==> END ##
-
-    ## ==> APP FUNCTIONS
-    ########################################################################
-    def progress(self):
-
-        global counter
-
-        # SET VALUE TO PROGRESS BAR
-        self.ui.progressBar.setValue(counter)
-
-        # CLOSE SPLASH SCREE AND OPEN APP
-        if counter > 100:
-            # STOP TIMER
-            self.timer.stop()
-
-            # SHOW MAIN WINDOW
-            self.main = loginScreen()
-            self.main.show()
-
-            # CLOSE SPLASH SCREEN
-            self.close()
-
-        # INCREASE COUNTER
-        counter += 1
-
-
-
-
-
 
 class loginScreen(QMainWindow):
+	'''
+	Classe da janela de login, herda os métodos de QMainWindow
+	'''
+	
 	def __init__(self):
+		'''
+		Setando a clsse com os objetos criados no arquivo .ui
+		'''
 		super().__init__()
 
 
@@ -178,7 +125,7 @@ class loginScreen(QMainWindow):
 
 
 	def setGIF(self):
-		self.login_ui.movie = QMovie("dna02-unscreen.gif")
+		self.login_ui.movie = QMovie("images/dna02-unscreen.gif")
 		self.login_ui.loginPicLabel.setMovie(self.login_ui.movie)
 		self.login_ui.movie.setScaledSize(QSize(100,100))
 		self.login_ui.movie.start()
@@ -200,7 +147,14 @@ class loginScreen(QMainWindow):
 
 
 class methodScreen(QMainWindow):
+	'''
+	Classe da janela de métodos de pesquisa
+	'''
+
 	def __init__(self, email):
+		'''
+		Setando a clsse com os objetos criados no arquivo .ui
+		'''
 		super().__init__()
 		self.email = email
 		self.method_ui = Ui_MethodWindow()
@@ -216,18 +170,26 @@ class methodScreen(QMainWindow):
 
 
 	def fileBrowser(self):
+		'''
+		Função definina no arquivo methods.py
+		'''
 		self.file_return = OpenDialogBox(self,self.method_ui) # Retorna só o ID	
 
 
 	def isValidSearch(self):
-		# Verifica se a pesquisa é válida
-		# 0 = Local / 1 = Web
+		'''
+		@param valid[0]: 0= inválido, 1 = válido
+		@param valid[1]: 0 = local, 1 = web
+		'''
 
 		self.valid=IsValidSearch(self.method_ui)	# Retorna um objeto com [Pesquisa Válida, Método de pesquisa]
 
 		if self.valid[0] == 1:
 			self.methodToLoadingScreen()
 
+			'''
+			Se for válida, passa os param para a função arguments() da classe loading
+			'''
 			if self.valid[1] == 1:
 				self.ldngScrn.arguments(1,self.method_ui,self.email)
 
@@ -244,7 +206,14 @@ class methodScreen(QMainWindow):
 
 
 class loadingScreen(QMainWindow):
+	'''
+	Classe da janela de carregamento
+	'''
+
 	def __init__(self,methodObject):
+		'''
+		Configuração da janela com os objetos da .ui
+		'''
 		super().__init__()
 		self.loading_ui = Ui_LoadingWindow()
 		self.loading_ui.setupUi(self)
@@ -252,15 +221,18 @@ class loadingScreen(QMainWindow):
 		self.mthdScrn = methodObject
 		self.rsltScrn = resultScreen(methodObject)
 
-		self.threadpool = QThreadPool()
-		# print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-
 		self.setGIF()
+
+		'''
+		Criando objeto thread para fazer a busca durante a tela de carregamento
+		'''
+		self.threadpool = QThreadPool()
+
 
 
 
 	def setGIF(self):
-		self.loading_ui.movie = QMovie("dna03-unscreen.gif")
+		self.loading_ui.movie = QMovie("images/dna03-unscreen.gif")
 		self.loading_ui.imageLabel.setMovie(self.loading_ui.movie)
 		self.loading_ui.movie.setScaledSize(QSize(200,200))
 		self.loading_ui.movie.start()
@@ -268,6 +240,12 @@ class loadingScreen(QMainWindow):
 
 
 	def arguments(self, identifier, handler, email):
+		'''
+		Passando os param para a classe loading
+
+		@param idenfifier: 0 = local, 1 = web
+		@param handler: retorno da busca no Entrez
+		'''
 		self.identifier = identifier
 		self.handler = handler
 		self.email = email
@@ -276,21 +254,29 @@ class loadingScreen(QMainWindow):
 
 
 	def multiTrheadSearch(self):
+		'''
+		Função para realizar a tarefa de busca sem interferir na aplicação normal do programa
+		Realiza a função de alinhamento e só volta a interagir quando estiver completa (ou tenha erro)
+		
+		@param self.alignment função passada como parâmetro
+
+		Após a thread ter terminado, os sinais são conectados as devidas funções
+		'''
 		worker = Worker(self.alignment)
 		worker.signals.result.connect(self.shows)
-		worker.signals.progress.connect(self.progress)
+		# worker.signals.progress.connect(self.progress)
 		worker.signals.error.connect(self.error)
 		worker.signals.finished.connect(self.thread_complete)
 		self.threadpool.start(worker)
 
 
 
-	def progress(self):
-		print("progress")
-
-
 	def alignment(self):
+		'''
+		Função passada como param para o Thread
 
+		@param identifier: 0 = local, 1 = web
+		'''
 		if self.identifier == 0: # Arquivo local
 			resultAlignment = LocalAlignment(self.handler)
 
@@ -304,11 +290,15 @@ class loadingScreen(QMainWindow):
 
 
 
-	### Resposta do Worker (resultado do alinhamento) ###
 	def shows(self, blast_record):
+		'''
+		Função conectada pelo sinal 'result' da thread
+		'''
 
 		if blast_record != None:
-			# print(blast_record)
+			'''
+			Funções de exibições pertencentes a classe de resultados
+			'''
 			self.rsltScrn.showAlignments(blast_record)
 			self.rsltScrn.showSites(blast_record)
 			self.rsltScrn.showGraph(blast_record)
@@ -316,18 +306,31 @@ class loadingScreen(QMainWindow):
 
 
 
+	def progress(self):
+		'''
+		Função conectada pelo sinal 'progress' da thread
+		'''
+		print("progress")
+
+
+
 	def error(self, trbck):
+		'''
+		Função conectada pelo sinal 'error' da thread
+		'''
    		self.rsltScrn.returnToMethod()
    		self.close()
    		PopSearchError(trbck)
 
 
 	def thread_complete(self):
+		'''
+		Função conectada pelo sinal 'finish' da thread
+		'''
    		print("THREAD COMPLETE!\n")
 
 
 	def loadingToResultWindow(self):
-		# print("Ta no resultado, dale!")
 		self.close()
 		self.rsltScrn.show()
 
@@ -335,7 +338,13 @@ class loadingScreen(QMainWindow):
 
 
 class resultScreen(QMainWindow):
+	'''
+	Classe da janela de resultados
+	'''
 	def __init__(self,methodObject):
+		'''
+		Passando os objetos da .ui
+		'''
 		super().__init__()
 
 		self.mthdScrn = methodObject
@@ -365,10 +374,14 @@ class resultScreen(QMainWindow):
 
 
 
+	'''
+	@param self.result_ui: objeto janela de resultados
+	@param blast_record: objeto retornado no resultado positivo da Thread 
+	@param self.seq_count: número de sequências a serem exibidas, valor inserido pelo usuário
+	'''
 	def showAlignments(self, blast_record):
 		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
 		ShowAlignments(self.result_ui, blast_record, self.seq_count)
-
 
 
 	def showSites(self,blast_record):
@@ -380,14 +393,16 @@ class resultScreen(QMainWindow):
 		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
 		ShowGraph(self, blast_record, self.seq_count)
 
-
-
+	# Ainda não
 	def showPhylo(self):
 		ShowPhylo(self,self.result_ui)
 	
 
 
 	def returnToMethod(self):
+		'''
+		Zerando os campos de texto e voltando para a tela de método
+		'''
 		self.mthdScrn.method_ui.searchEdit.setText('')
 		self.mthdScrn.method_ui.insertEdit.setText('')
 		self.mthdScrn.method_ui.sequencesAskLineEdit_2.setText('1')
@@ -396,10 +411,12 @@ class resultScreen(QMainWindow):
 		
 
 
-
+'''
+Aplicação:
+'''
 if __name__ == "__main__":
 
 	app = QtWidgets.QApplication(sys.argv)
-	ui = splashScreen()	
+	ui = loginScreen()	
 	ui.show()
 	sys.exit(app.exec_())

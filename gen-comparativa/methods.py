@@ -120,6 +120,8 @@ def LocalAlignment(id):
     try:
         result_handle = NCBIWWW.qblast("blastn", "nt", id)
         blast_record = NCBIXML.read(result_handle) 
+
+        result_handle.close()
     except:
         traceback.print_exc()
         return None
@@ -162,6 +164,11 @@ def WebAlignment(result_search):
     try:
         result_handle = NCBIWWW.qblast("blastn", "nt",result_search['IdList'][0], alignments=2)
         blast_record = NCBIXML.read(result_handle) 
+
+        with open("results/alignment_1.xml","w") as f:
+            f.write(result_handle)
+
+        result_handle.close()
     except:
         traceback.print_exc()
         return None
@@ -169,7 +176,7 @@ def WebAlignment(result_search):
 
     ########### Test ###########
 
-    # path = "/results/alignment_result.xml"
+    # path = "results/alignment_result.xml"
     # # path_test = "results/alignment_result_test.xml"
 
     # try:
@@ -179,7 +186,7 @@ def WebAlignment(result_search):
 
     # except:
     #     traceback.print_exc()
-    #     return None
+        # return None
 
     #############################
 
@@ -230,7 +237,7 @@ def ShowAlignments(self, blast_record, seq_count):
 
     #################
 
-    path = "result.txt"
+    path = "results/result.txt"
 
     try:
         with open(path ,'w') as result_file:
@@ -297,11 +304,35 @@ def ShowSites(self, blast_record, seq_count):
 
     path = "results/sites_result.txt"
 
+    query = blast_record.number
+    print('\n\n')
+    print(query)
+    print('\n\n')
 
     for alignment in blast_record.alignments:
         for hsp in alignment.hsps:
             if count < seq_count:
                 count+=1
+
+                # query = hsp.query
+
+                # result_file.write("\n *** Sítios *** \n\n")
+
+                # '''''' 
+                # # Escreve a sequência referência (o for é para percorrer os nuceotídeos e dar um espaco depois de mostrar cada um)
+                # result_file.write("*** Comparações entre a Query e as Subjects *** \n")
+                # result_file.write("Sequência:\tNúmero de mutações:\tBases:\n")
+
+                # result_file.write("Query:\t\t\t")
+
+                # for c in range(0,len(queryies[0])):
+                #     result_file.write(str(queryies[0][c]) + " ")
+
+                # result_file.write("\n")
+                # ''''''
+
+
+
 
                 queryies.append(hsp.query)
                 matches.append(hsp.match)
@@ -322,8 +353,10 @@ def ShowSites(self, blast_record, seq_count):
 
             '''''' 
             # Escreve a sequência referência (o for é para percorrer os nuceotídeos e dar um espaco depois de mostrar cada um)
+            result_file.write("*** Comparações entre a Query e as Subjects *** \n")
+            result_file.write("Sequência:\tNúmero de mutações:\tBases:\n")
 
-            result_file.write("Query:\t\t")
+            result_file.write("Query:\t\t\t")
 
             for c in range(0,len(queryies[0])):
                 result_file.write(str(queryies[0][c]) + " ")
@@ -334,8 +367,13 @@ def ShowSites(self, blast_record, seq_count):
 
             ''''''
             # Escreve os subjects
-            for i in range(0,len(subjects)):    # Percorre os indices de subjects
+            for i in range(len(subjects)):    # Percorre os indices de subjects
                 result_file.write("Subject "+ str(i) +":\t")
+
+                positions = comparison(queryies[0],subjects[i])
+                # positions = comparison("AAAATTTTCCCCGGGG","AAACTTTTCCCAGGGG") -> 2
+
+                result_file.write(str( len(positions) ) + "\t")
 
                 for c in range(0,len(subjects[i])): # Percorre as bases de cada subject
 
@@ -345,7 +383,20 @@ def ShowSites(self, blast_record, seq_count):
                         result_file.write(str(subjects[i][c]) + "!") # Mutação
 
                 result_file.write("\n")
+
+
+            # while i != queryies[].query_start
+
+
+
+            result_file.write("\n\n")
             ''''''
+
+            positions = 0
+            for i in range(len(subjects)):
+                
+                result_file.write(str(positions) + "\n")
+
 
     except:
         traceback.print_exc()
@@ -451,6 +502,33 @@ def hamming(d1, d2):
             total += 1
     print(total)
     return total
+
+
+
+def comparison(genome1, genome2):
+    positions = []
+    if (len(genome1) == len(genome2)):
+        for i in range(len(genome1)):
+            if genome1[i] != genome2[i]:
+                positions.append(i)
+        return positions
+
+    if (len(genome1) > len(genome2)):
+        for i in range(len(genome2)):
+            if genome1[i] != genome2[i]:
+                positions.append(i)
+        if len(positions) == 0:
+            positions.append(len(genome1) - 1)
+        return positions
+        
+    if (len(genome1) < len(genome2)):
+        for i in range(len(genome1)):
+            if (genome1[i] != genome2[i]):
+                positions.append(i)
+        if len(positions) == 0:
+            positions.append(len(genome2) - 1)
+        return positions
+
 
 
 def ShowPhylo(self,result_ui):

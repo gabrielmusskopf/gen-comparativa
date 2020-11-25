@@ -318,16 +318,16 @@ class loadingScreen(QMainWindow):
 		'''
 		Função conectada pelo sinal 'error' da thread
 		'''
-   		self.rsltScrn.returnToMethod()
-   		self.close()
-   		PopSearchError(trbck)
+		self.rsltScrn.returnToMethod()
+		self.close()
+		PopSearchError(trbck)
 
 
 	def thread_complete(self):
 		'''
 		Função conectada pelo sinal 'finish' da thread
 		'''
-   		print("THREAD COMPLETE!\n")
+		print("THREAD COMPLETE!\n")
 
 
 	def loadingToResultWindow(self):

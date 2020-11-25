@@ -12,10 +12,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_LoadingWindow(object):
-    def setupUi(self, MethodWindow):
-        MethodWindow.setObjectName("MethodWindow")
-        MethodWindow.resize(559, 358)
-        self.centralwidget = QtWidgets.QWidget(MethodWindow)
+    def setupUi(self, LoadingWindow):
+        LoadingWindow.setObjectName("LoadingWindow")
+        LoadingWindow.resize(559, 358)
+        self.centralwidget = QtWidgets.QWidget(LoadingWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -78,41 +78,41 @@ class Ui_LoadingWindow(object):
         self.imageLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.imageLabel.setObjectName("imageLabel")
         self.verticalLayout_2.addWidget(self.imageLabel)
-        self.progressBar = QtWidgets.QProgressBar(self.loadingFrame)
-        self.progressBar.setStyleSheet("QProgressBar {\n"
-"    \n"
-"    background-color: rgb(98, 114, 164);\n"
-"    color: rgb(200, 200, 200);\n"
-"    border-style: none;\n"
-"    border-radius: 10px;\n"
-"    text-align: center;\n"
-"}\n"
-"QProgressBar::chunk{\n"
-"    border-radius: 10px;\n"
-"    background-color: qlineargradient(spread:pad, x1:0, y1:0.511364, x2:1, y2:0.523, stop:0 rgba(254, 121, 199, 255), stop:1 rgba(170, 85, 255, 255));\n"
-"}")
-        self.progressBar.setProperty("value", 24)
-        self.progressBar.setObjectName("progressBar")
-        self.verticalLayout_2.addWidget(self.progressBar)
+#         self.progressBar = QtWidgets.QProgressBar(self.loadingFrame)
+#         self.progressBar.setStyleSheet("QProgressBar {\n"
+# "    \n"
+# "    background-color: rgb(98, 114, 164);\n"
+# "    color: rgb(200, 200, 200);\n"
+# "    border-style: none;\n"
+# "    border-radius: 10px;\n"
+# "    text-align: center;\n"
+# "}\n"
+# "QProgressBar::chunk{\n"
+# "    border-radius: 10px;\n"
+# "    background-color: qlineargradient(spread:pad, x1:0, y1:0.511364, x2:1, y2:0.523, stop:0 rgba(254, 121, 199, 255), stop:1 rgba(170, 85, 255, 255));\n"
+# "}")
+#         self.progressBar.setProperty("value", 24)
+#         self.progressBar.setObjectName("progressBar")
+#         self.verticalLayout_2.addWidget(self.progressBar)
         self.gridLayout.addWidget(self.loadingFrame, 0, 0, 1, 1)
         self.verticalLayout.addWidget(self.back_frame)
-        MethodWindow.setCentralWidget(self.centralwidget)
+        LoadingWindow.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MethodWindow)
-        QtCore.QMetaObject.connectSlotsByName(MethodWindow)
+        self.retranslateUi(LoadingWindow)
+        QtCore.QMetaObject.connectSlotsByName(LoadingWindow)
 
-    def retranslateUi(self, MethodWindow):
+    def retranslateUi(self, LoadingWindow):
         _translate = QtCore.QCoreApplication.translate
-        MethodWindow.setWindowTitle(_translate("MethodWindow", "MainWindow"))
-        self.titleLabel.setText(_translate("MethodWindow", "Carregando"))
-        self.descriptionLabel.setText(_translate("MethodWindow", "<strong>CARREGANDO </strong> ALINHAMENTOS"))
+        LoadingWindow.setWindowTitle(_translate("LoadingWindow", "MainWindow"))
+        self.titleLabel.setText(_translate("LoadingWindow", "Carregando"))
+        self.descriptionLabel.setText(_translate("LoadingWindow", "<strong>CARREGANDO </strong> ALINHAMENTOS"))
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MethodWindow = QtWidgets.QMainWindow()
-    ui = Ui_MethodWindow()
-    ui.setupUi(MethodWindow)
-    MethodWindow.show()
+    LoadingWindow = QtWidgets.QMainWindow()
+    ui = Ui_LoadingWindow()
+    ui.setupUi(LoadingWindow)
+    LoadingWindow.show()
     sys.exit(app.exec_())

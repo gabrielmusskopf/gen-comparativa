@@ -13,3 +13,5 @@ gen-comparativa/results
 gen-comparativa/main.py
 gen-comparativa/ui_splash_screen.py
 gen-comparativa/splash_screen.ui
+
+*.7z

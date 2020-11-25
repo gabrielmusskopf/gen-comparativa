@@ -283,25 +283,24 @@ class loadingScreen(QMainWindow):
 		elif self.identifier == 1:	# Arquivo web
 			resultSearch = Search(self.handler,self.email) # Busca no banco de dados
 
-			if resultSearch["IdList"] != []:
+			if resultSearch.id != []:
 				resultAlignment = WebAlignment(resultSearch) # Realiza o alinhamento dessa busca
 
-		return resultAlignment	# Retorna o resultado do alinhamento ou o erro ocorrido
+		return [resultSearch, resultAlignment]	# Retorna o resultado do alinhamento ou o erro ocorrido
 
 
 
-	def shows(self, blast_record):
+	def shows(self, results):
 		'''
 		Função conectada pelo sinal 'result' da thread
 		'''
-
-		if blast_record != None:
+		if results[1] != None:
 			'''
 			Funções de exibições pertencentes a classe de resultados
 			'''
-			self.rsltScrn.showAlignments(blast_record)
-			self.rsltScrn.showSites(blast_record)
-			self.rsltScrn.showGraph(blast_record)
+			self.rsltScrn.showAlignments(results)
+			self.rsltScrn.showSites(results)
+			self.rsltScrn.showGraph(results)
 			self.loadingToResultWindow()
 
 
@@ -376,22 +375,22 @@ class resultScreen(QMainWindow):
 
 	'''
 	@param self.result_ui: objeto janela de resultados
-	@param blast_record: objeto retornado no resultado positivo da Thread 
+	@param results: lista com o resultado da pesquisa em formato .fasta e objeto blast de alinhamento 
 	@param self.seq_count: número de sequências a serem exibidas, valor inserido pelo usuário
 	'''
-	def showAlignments(self, blast_record):
+	def showAlignments(self, results):
 		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
-		ShowAlignments(self.result_ui, blast_record, self.seq_count)
+		ShowAlignments(self.result_ui, results, self.seq_count)
 
 
-	def showSites(self,blast_record):
+	def showSites(self,results):
 		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
-		ShowSites(self.result_ui, blast_record, self.seq_count)
+		ShowSites(self.result_ui, results, self.seq_count)
 
 
-	def showGraph(self, blast_record):
+	def showGraph(self, results):
 		self.seq_count = int(self.mthdScrn.method_ui.sequencesAskLineEdit_2.text())
-		ShowGraph(self, blast_record, self.seq_count)
+		ShowGraph(self, results, self.seq_count)
 
 	# Ainda não
 	def showPhylo(self):

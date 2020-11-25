@@ -27,6 +27,10 @@ import math
 
 # Checa se tem formato de email
 def CheckEmail(email):  
+    if email == 'admin':
+        Entrez.email = 'gabrielgmusskopf@gmail.com'
+        print("Bem-vindo(a), ", Entrez.email)
+        return True
     if( validate_email( email )):  
         print(email)
         return True
@@ -126,14 +130,28 @@ def Search(method_ui,email):
     Para mais parâmetros: https://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch 
     '''
 
+    term = method_ui.searchEdit.text()
+
+    if ' ' in term:
+        term = term.replace(' ','+')
+
     try:
-        handle = Entrez.esearch(db="nucleotide", term = method_ui.searchEdit.text(), idtype="acc", retmax = 1) # Retorna um XML
+        handle = Entrez.esearch(db="nucleotide", term = term, idtype="acc", retmax = 1) # Retorna um XML
         record = Entrez.read(handle) #lendo as infos geradas pela pesquisa # Converte XML para estrutura de dados python (dicionários)
+        
+        # print(record.keys())
+        # print(record)
+
+        h = Entrez.efetch(db="nucleotide", id=record['IdList'], rettype="fasta", retmode="text")
+        record_fasta = SeqIO.read(h,'fasta')   #SeqIO.read() somente um ID
+        # print(seq.id)
+        # print(len(seq.seq))
+
         handle.close()
     except:
         return False
 
-    return record
+    return record_fasta
     
 
 
@@ -200,32 +218,32 @@ def WebAlignment(result_search):
 
     print("######################")
     print("Entrei no alinhamento da pesquisa web:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
-    print("ID de alinhamento: ", result_search['IdList'][0])
+    print("ID de alinhamento: ", result_search.id)
 
-    id = result_search['IdList'][0]
-    try:
-        result_handle = NCBIWWW.qblast("blastn", "nt", id)
-        blast_record = NCBIXML.read(result_handle) 
-        result_handle.close()
-    except:
-        traceback.print_exc()
-        return None
+    # id = result_search.id
+    # try:
+    #     result_handle = NCBIWWW.qblast("blastn", "nt", id)
+    #     blast_record = NCBIXML.read(result_handle) 
+    #     result_handle.close()
+    # except:
+    #     traceback.print_exc()
+    #     return None
 
 
 
     ########### Test ###########
 
-    # path = "results/alignment_result.xml"
-    # # path_test = "results/alignment_result_test.xml"
+    path = "results/alignment_result_test.xml"
+    # path_test = "results/alignment_result_test.xml"
 
-    # try:
-    #     with open(path,"r") as result_handle:
-    #         # exec('blast_record = NCBIXML.read(result_handle)')
-    #         blast_record = NCBIXML.read(result_handle)
+    try:
+        with open(path,"r") as result_handle:
+            # exec('blast_record = NCBIXML.read(result_handle)')
+            blast_record = NCBIXML.read(result_handle)
 
-    # except:
-    #     traceback.print_exc()
-        # return None
+    except:
+        traceback.print_exc()
+        return None
 
     #############################
 
@@ -237,8 +255,10 @@ def WebAlignment(result_search):
 
 
 '''
+Função que exibe alinhamentos na tela
+
 @param self classe de onde foi chamado
-@param blast_record objeto em formato de dicionário que retornou do alinhamento
+@param results lista com o resultado da pesquisa lido por SeqIO e objeto em formato de dicionário que retornou do alinhamento
 @param seq_count número de sequências que aparecerão na tela
 
 
@@ -265,13 +285,17 @@ Exemplo de acesso à informações no blast_record:
 >>>     traceback.print_exc()
 >>>     pass
 
-
 '''
-def ShowAlignments(self, blast_record, seq_count):
+def ShowAlignments(self, results, seq_count):
 
 
     print("###################")
     print("Entrou na função de exibir o alinhamento:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+
+    search_record = results[0]
+    blast_record = results[1]
+
+    query = search_record.seq
 
     count = 0
     maxs = 0
@@ -282,9 +306,6 @@ def ShowAlignments(self, blast_record, seq_count):
 
 
     ### Para escrever na tela, é preciso gravar em um arquivo ###
-
-
-   
 
     path = "results/result.txt"
 
@@ -304,7 +325,8 @@ def ShowAlignments(self, blast_record, seq_count):
                         ########### Escreve sequências ###########
                         # Para escrever do mesmo jeito que no BLAST
                         # math.ceil() arredonda o número para cima
-                        for b in range( 0, math.ceil( len( hsp.query ) / 60 )):
+                        for b in range( math.ceil( len( hsp.query ) / 60 )):
+
 
                             result_file.write(
                                 str(hsp.query_start + (61 * b ) ) + " " + str(hsp.query[ b*60 : (b+1)*60 ] ) + " " + str((hsp.query_start + 60) + (b*61)) + "\n" + 
@@ -319,7 +341,7 @@ def ShowAlignments(self, blast_record, seq_count):
         traceback.print_exc()
 
     ''' Setando o tamanho conforme a quantidade de sequências '''
-    self.alignmentScrollFrame.setMinimumSize(QtCore.QSize(1200,  1.5*maxs*(count/3) )) #count*15000)) 
+    self.alignmentScrollFrame.setMinimumSize(QtCore.QSize(1200,  25000)) #count*15000)) 
 
 
     try:
@@ -336,10 +358,18 @@ def ShowAlignments(self, blast_record, seq_count):
 
 
 
-
-def ShowSites(self, blast_record, seq_count):
+'''
+Função que exibe os sítios conservativos
+@param self classe de onde foi chamado
+@param results lista com o resultado da pesquisa lido por SeqIO e objeto em formato de dicionário que retornou do alinhamento
+@param seq_count número de sequências que aparecerão na tela
+'''
+def ShowSites(self, results, seq_count):
     print("###################")
     print("Entrou na função de exibir os sitios:", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+
+    search_record = results[0]
+    blast_record = results[1]
 
     count=0
     queryies=[]
@@ -384,7 +414,7 @@ def ShowSites(self, blast_record, seq_count):
             result_file.write("*** Comparações entre a Query e as Subjects *** \n")
             result_file.write("Sequência:\tNúmero de mutações:\tBases:\n")
 
-            result_file.write("Query:\t\t\t\t")
+            result_file.write("Query:\t\t\t\t\t")
 
             ''' Escreve cada caractere da sequência com um espaço '''
             for c in range(0,len(queryies[0])):
@@ -394,8 +424,27 @@ def ShowSites(self, blast_record, seq_count):
             ''''''
 
 
-            ''''''
-            # Escreve os subjects
+            '''
+            AAATTTCCCGGG     QUERY
+            ||||||||||||    ||||||||
+            AAATTTCCCGGG    SUBJECT0
+            ||||||||||||    ||||||||
+               TTTCCCGGG    SUBJECT1
+            ||||||||||||    ||||||||
+                ...           ...
+                            SUBJECTN
+
+            ~ Para cada sequência 's' de subjects
+            ~ Para cada base 'base' da query
+                - Se o índice da query for maior/igual ao índice que inicia a subject 
+                    - Se a base da query com o índice correspondente ao índice da subject for igual a base da subject
+                        Coloca a base
+                    - Se a base da query com o índice correspondente ao índice da subject for diferente da base da subject
+                        Coloca a base com um indicador de mutação
+                - Se o índice não for igual/maior, coloca espaço em branco
+            '''
+
+
             for i in range(len(subjects)):    # Percorre os indices de subjects
                 result_file.write("Subject "+ str(i) +":\t\t")
 
@@ -417,7 +466,6 @@ def ShowSites(self, blast_record, seq_count):
                 result_file.write("\n")
 
             result_file.write("\n\n")
-            ''''''
 
 
 
@@ -441,11 +489,19 @@ def ShowSites(self, blast_record, seq_count):
 
 
 
-
-def ShowGraph(self, blast_record, seq_count):
+'''
+Função que exibe os gráficos
+@param self classe de onde foi chamado
+@param results lista com o resultado da pesquisa lido por SeqIO e objeto em formato de dicionário que retornou do alinhamento
+@param seq_count número de sequências que aparecerão na tela
+'''
+def ShowGraph(self, results, seq_count):
 
     print("###################")
     print("Entrou na função de exibir gráfico: ", datetime.now().hour, ":", datetime.now().minute, ":", datetime.now().second)
+
+    search_record = results[0]
+    blast_record = results[1]
 
     count = 0
     bases = {'A','C','G','T'}   # Dicionário com a quantidade de bases 
@@ -518,7 +574,11 @@ def ShowGraph(self, blast_record, seq_count):
     print("###################\n")
 
 
-
+'''
+Função Distância de Hamming que calcula o total de mutações
+@param d1 primeira sequência 
+@param d2 segunda sequência
+'''
 def hamming(d1, d2):
     total = 0
 
@@ -533,7 +593,11 @@ def hamming(d1, d2):
     return total
 
 
-
+'''
+Função que compara e retorna uma lista com as posições das mutações
+@param genome1 primeira sequência
+@param genome2 segunda sequência
+'''
 def comparison(genome1, genome2):
     positions = []
     if (len(genome1) == len(genome2)):
@@ -559,14 +623,17 @@ def comparison(genome1, genome2):
         return positions
 
 
-
+'''
+~ Ainda não
+Função que exibe a árvore filogenética
+@param self classe resultScreen
+@param 
+'''
 def ShowPhylo(self,result_ui):
     print("Mostrando árvore filogenética..")
     # result_ui.resultText.setPixmap(QtGui.QPixmap("C:/Users/fabri_000/Documents/_Pesquisas TCC/Bioinformática Python/gui-pyqt5/images/loading_dna.gif"))
     
     
-
-
     # Alinhamento soemnte com arquivo local por enquanto
     # tree = Phylo.read('alignment_result.xml', 'phyloxml')
     # print(tree)

@@ -1,0 +1,15 @@
+Para rodar o programa, segue o passo-a-passo:
+
+- Baixar o arquivo compactado
+- Descompactá-lo
+- Abrir o arquivo main.py
+
+Primeiramente será aberto um console, onde aparecerá as etapas em que o programa se encontra.
+Após abrir o console, abrirá o programa, onde serão feitas as buscas.
+
+--Na primeira tela, é necessário informar o e-mail que será enviado para o Entrez.
+--A segunda tela é a de escolha do método de busca/inserção da sequência, e da escolha da quantidade de sequências que serão mostradas
+--A tela de carregamento aparece enquanto são realizadas as buscas/alinhamentos
+--Na última tela estão os resultados do alinhamento, da comparação da sequência query com as subjects, e dos gráficos dos números de bases de cada subject
+
+Para mais informações, consultar no repositório no github: https://github.com/gabrielmusskopf/gen-comparativa
